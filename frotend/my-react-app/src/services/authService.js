@@ -23,3 +23,8 @@ export const getCurrentUser = () => {
   const user = localStorage.getItem('user');
   return user ? JSON.parse(user) : null;
 };
+
+export const getProfile = async () => {
+  const response = await API.get('/auth/me');
+  return response.data;
+};

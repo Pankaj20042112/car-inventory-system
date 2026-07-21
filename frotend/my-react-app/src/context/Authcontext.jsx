@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { getCurrentUser, login, logout, register } from '../services/authService';
+import { getCurrentUser, login, logout, register, getProfile } from '../services/authService';
 
 export const AuthContext = createContext();
 
@@ -8,11 +8,26 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-    setLoading(false);
+    const verifySession = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          // Call database to verify user existence and token validity
+          const verifiedUser = await getProfile();
+          setUser(verifiedUser);
+          localStorage.setItem('user', JSON.stringify(verifiedUser));
+        } catch (error) {
+          // If user is not found in database or token is invalid
+          logout();
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    };
+
+    verifySession();
   }, []);
 
   const loginUser = async (username, password) => {

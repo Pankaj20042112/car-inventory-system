@@ -79,3 +79,19 @@ exports.login = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+exports.getMe = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) {
+      return res.status(401).json({ error: 'User does not exist in the database' });
+    }
+
+    const userJson = { ...user };
+    delete userJson.password;
+
+    return res.status(200).json(userJson);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
