@@ -1,15 +1,14 @@
-const Vehicle = require('../models/Vehicle');
-const mongoose = require('mongoose');
+const prisma = require('../config/db');
 
 exports.purchaseVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || id.length !== 24) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
 
-    const vehicle = await Vehicle.findById(id);
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
@@ -18,10 +17,16 @@ exports.purchaseVehicle = async (req, res) => {
       return res.status(400).json({ error: 'Vehicle is out of stock' });
     }
 
-    vehicle.quantity -= 1;
-    await vehicle.save();
+    const updated = await prisma.vehicle.update({
+      where: { id },
+      data: {
+        quantity: {
+          decrement: 1
+        }
+      }
+    });
 
-    return res.status(200).json(vehicle);
+    return res.status(200).json(updated);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -36,19 +41,25 @@ exports.restockVehicle = async (req, res) => {
       return res.status(400).json({ error: 'Restock quantity must be a positive integer' });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || id.length !== 24) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
 
-    const vehicle = await Vehicle.findById(id);
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
 
-    vehicle.quantity += parseInt(quantity);
-    await vehicle.save();
+    const updated = await prisma.vehicle.update({
+      where: { id },
+      data: {
+        quantity: {
+          increment: parseInt(quantity)
+        }
+      }
+    });
 
-    return res.status(200).json(vehicle);
+    return res.status(200).json(updated);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

@@ -1,23 +1,20 @@
+process.env.MONGODB_URI = process.env.MONGODB_URI_TEST || 'mongodb://127.0.0.1:27017/car_dealership_test';
 const request = require('supertest');
 const app = require('../app');
-const connectDB = require('../config/db');
-const mongoose = require('mongoose');
-const User = require('../models/User');
+const prisma = require('../config/db');
 
 beforeAll(async () => {
-  // Connect to test MongoDB database
-  await connectDB();
+  await prisma.$connect();
 });
 
 afterAll(async () => {
-  // Close the database connection
-  await mongoose.connection.close();
+  await prisma.$disconnect();
 });
 
 describe('Authentication API', () => {
   beforeEach(async () => {
     // Clear users before each test
-    await User.deleteMany({});
+    await prisma.user.deleteMany({});
   });
 
   describe('POST /api/auth/register', () => {
@@ -37,7 +34,7 @@ describe('Authentication API', () => {
       expect(res.body.user).not.toHaveProperty('password');
 
       // Verify db entry
-      const user = await User.findOne({ username: 'john_doe' });
+      const user = await prisma.user.findUnique({ where: { username: 'john_doe' } });
       expect(user).toBeTruthy();
       expect(user.role).toEqual('user');
     });

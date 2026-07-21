@@ -1,9 +1,7 @@
+process.env.MONGODB_URI = process.env.MONGODB_URI_TEST || 'mongodb://127.0.0.1:27017/car_dealership_test';
 const request = require('supertest');
 const app = require('../app');
-const connectDB = require('../config/db');
-const mongoose = require('mongoose');
-const User = require('../models/User');
-const Vehicle = require('../models/Vehicle');
+const prisma = require('../config/db');
 
 let userToken;
 let adminToken;
@@ -11,10 +9,10 @@ let testVehicleId;
 
 beforeAll(async () => {
   // Connect to database
-  await connectDB();
+  await prisma.$connect();
 
   // Clear users first
-  await User.deleteMany({});
+  await prisma.user.deleteMany({});
 
   // Create admin user and log in
   await request(app)
@@ -52,37 +50,43 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.connection.close();
+  await prisma.$disconnect();
 });
 
 describe('Vehicles and Inventory API', () => {
   beforeEach(async () => {
     // Clear vehicles and insert test vehicles
-    await Vehicle.deleteMany({});
+    await prisma.vehicle.deleteMany({});
 
-    const car = await Vehicle.create({
-      make: 'Toyota',
-      model: 'Camry',
-      category: 'Sedan',
-      price: 24000,
-      quantity: 5
+    const car = await prisma.vehicle.create({
+      data: {
+        make: 'Toyota',
+        model: 'Camry',
+        category: 'Sedan',
+        price: 24000,
+        quantity: 5
+      }
     });
     testVehicleId = car.id;
 
-    await Vehicle.create({
-      make: 'Tesla',
-      model: 'Model Y',
-      category: 'SUV',
-      price: 48000,
-      quantity: 3
+    await prisma.vehicle.create({
+      data: {
+        make: 'Tesla',
+        model: 'Model Y',
+        category: 'SUV',
+        price: 48000,
+        quantity: 3
+      }
     });
 
-    await Vehicle.create({
-      make: 'Honda',
-      model: 'Civic',
-      category: 'Sedan',
-      price: 22000,
-      quantity: 0
+    await prisma.vehicle.create({
+      data: {
+        make: 'Honda',
+        model: 'Civic',
+        category: 'Sedan',
+        price: 22000,
+        quantity: 0
+      }
     });
   });
 
@@ -215,7 +219,7 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty('message');
 
-      const check = await Vehicle.findById(testVehicleId);
+      const check = await prisma.vehicle.findUnique({ where: { id: testVehicleId } });
       expect(check).toBeNull();
     });
 
@@ -237,12 +241,12 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.quantity).toEqual(4); // 5 -> 4
 
-      const check = await Vehicle.findById(testVehicleId);
+      const check = await prisma.vehicle.findUnique({ where: { id: testVehicleId } });
       expect(check.quantity).toEqual(4);
     });
 
     it('should fail purchase if vehicle is out of stock', async () => {
-      const outOfStockCar = await Vehicle.findOne({ make: 'Honda' });
+      const outOfStockCar = await prisma.vehicle.findFirst({ where: { make: 'Honda' } });
 
       const res = await request(app)
         .post(`/api/vehicles/${outOfStockCar.id}/purchase`)
@@ -265,7 +269,7 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.quantity).toEqual(15); // 5 + 10
 
-      const check = await Vehicle.findById(testVehicleId);
+      const check = await prisma.vehicle.findUnique({ where: { id: testVehicleId } });
       expect(check.quantity).toEqual(15);
     });
 

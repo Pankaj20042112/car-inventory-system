@@ -1,24 +1,26 @@
 require('dotenv').config();
 const app = require('./app');
-const connectDB = require('./config/db');
+const prisma = require('./config/db');
 
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Establish connection to MongoDB database instance
-    await connectDB();
+    // Connect to MongoDB via Prisma Client
+    await prisma.$connect();
+    console.log('Connected to MongoDB via Prisma Client.');
 
     // Seed default admin user if not present
-    const User = require('./models/User');
     const bcrypt = require('bcryptjs');
-    const adminUser = await User.findOne({ username: 'admin' });
+    const adminUser = await prisma.user.findUnique({ where: { username: 'admin' } });
     if (!adminUser) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
-      await User.create({
-        username: 'admin',
-        password: hashedPassword,
-        role: 'admin'
+      await prisma.user.create({
+        data: {
+          username: 'admin',
+          password: hashedPassword,
+          role: 'admin'
+        }
       });
       console.log('Successfully pre-seeded default admin account (admin / admin123)');
     }

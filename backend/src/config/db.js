@@ -1,21 +1,6 @@
-const mongoose = require('mongoose');
+const { PrismaClient } = require('@prisma/client');
 
-const connectDB = async () => {
-  const env = process.env.NODE_ENV || 'development';
-  const uri = env === 'test'
-    ? (process.env.MONGODB_URI_TEST || 'mongodb://127.0.0.1:27017/car_dealership_test')
-    : (process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/car_dealership');
+// Create single shared instance of the Prisma Client
+const prisma = new PrismaClient();
 
-  try {
-    const conn = await mongoose.connect(uri);
-    if (env !== 'test') {
-      console.log(`MongoDB Connected: ${conn.connection.host}`);
-    }
-    return conn;
-  } catch (error) {
-    console.error(`MongoDB Connection Error: ${error.message}`);
-    process.exit(1);
-  }
-};
-
-module.exports = connectDB;
+module.exports = prisma;

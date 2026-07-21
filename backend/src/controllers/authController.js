@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const prisma = require('../config/db');
 const { JWT_SECRET } = require('../middleware/auth');
 
 exports.register = async (req, res) => {
@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ username });
+    const existingUser = await prisma.user.findUnique({ where: { username } });
     if (existingUser) {
       return res.status(400).json({ error: 'Username is already taken' });
     }
@@ -21,15 +21,20 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create the user
-    const newUser = await User.create({
-      username,
-      password: hashedPassword,
-      role: role || 'user'
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        password: hashedPassword,
+        role: role || 'user'
+      }
     });
+
+    const userJson = { ...newUser };
+    delete userJson.password;
 
     return res.status(201).json({
       message: 'User registered successfully',
-      user: newUser.toJSON()
+      user: userJson
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -44,8 +49,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Find the user (need password field)
-    const user = await User.findOne({ username });
+    // Find the user
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
@@ -63,9 +68,12 @@ exports.login = async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    const userJson = { ...user };
+    delete userJson.password;
+
     return res.status(200).json({
       token,
-      user: user.toJSON()
+      user: userJson
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
