@@ -17,6 +17,28 @@ exports.purchaseVehicle = async (req, res) => {
       return res.status(400).json({ error: 'Vehicle is out of stock' });
     }
 
+    const buyer = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!buyer) {
+      return res.status(404).json({ error: 'Buyer not found' });
+    }
+
+    const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
+
+    const purchase = await prisma.purchase.create({
+      data: {
+        receiptNo,
+        buyerId: buyer.id,
+        buyerName: buyer.name || buyer.username,
+        buyerEmail: buyer.email || 'N/A',
+        buyerCategory: buyer.category || 'Customer',
+        vehicleId: vehicle.id,
+        make: vehicle.make,
+        model: vehicle.model,
+        category: vehicle.category,
+        price: vehicle.price
+      }
+    });
+
     const updated = await prisma.vehicle.update({
       where: { id },
       data: {
@@ -26,7 +48,10 @@ exports.purchaseVehicle = async (req, res) => {
       }
     });
 
-    return res.status(200).json(updated);
+    return res.status(200).json({
+      vehicle: updated,
+      purchase
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

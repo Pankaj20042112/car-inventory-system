@@ -53,7 +53,7 @@ const Dashboard = () => {
   };
 
   // PDF Receipt Generator
-  const generateReceiptPDF = (vehicle) => {
+  const generateReceiptPDF = (vehicle, purchase) => {
     try {
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -77,15 +77,15 @@ const Dashboard = () => {
       doc.text('Premium Vehicles & Luxury Automobile Services', 15, 28);
       doc.text('Authorized Agent System', 15, 34);
 
-      const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
-      const dateStr = new Date().toLocaleString();
+      const receiptNo = purchase?.receiptNo || 'REC-' + Math.floor(100000 + Math.random() * 900000);
+      const dateStr = purchase?.createdAt ? new Date(purchase.createdAt).toLocaleString() : new Date().toLocaleString();
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(255, 255, 255);
       doc.text(`RECEIPT: ${receiptNo}`, 145, 20);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 145, 26);
+      doc.text(`Date: ${purchase?.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`, 145, 26);
       doc.text('Status: PAID', 145, 32);
 
       // Indigo Accent Line
@@ -118,11 +118,11 @@ const Dashboard = () => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(51, 65, 85);
-      doc.text(`Name: ${user?.name || 'N/A'}`, 110, 67);
+      doc.text(`Name: ${purchase?.buyerName || user?.name || 'N/A'}`, 110, 67);
       doc.text(`Username: ${user?.username || 'N/A'}`, 110, 73);
-      doc.text(`Email: ${user?.email || 'N/A'}`, 110, 79);
-      doc.text(`Category: ${user?.category || 'Customer'}`, 110, 85);
-      doc.text(`Account ID: ${user?.id || 'Guest'}`, 110, 91);
+      doc.text(`Email: ${purchase?.buyerEmail || user?.email || 'N/A'}`, 110, 79);
+      doc.text(`Category: ${purchase?.buyerCategory || user?.category || 'Customer'}`, 110, 85);
+      doc.text(`Account ID: ${purchase?.buyerId || user?.id || 'Guest'}`, 110, 91);
 
       // Horizontal Divider
       doc.setDrawColor(226, 232, 240);
@@ -221,14 +221,14 @@ const Dashboard = () => {
   // Purchase handler
   const handlePurchase = async (id) => {
     try {
-      const updated = await purchaseVehicle(id);
+      const responseData = await purchaseVehicle(id);
       showToast(`Vehicle purchased successfully!`);
       // Update local state
       setVehicles((prev) =>
-        prev.map((v) => (v.id === id ? { ...v, quantity: updated.quantity } : v))
+        prev.map((v) => (v.id === id ? { ...v, quantity: responseData.vehicle.quantity } : v))
       );
       // Trigger PDF Receipt Download
-      generateReceiptPDF(updated);
+      generateReceiptPDF(responseData.vehicle, responseData.purchase);
     } catch (err) {
       showToast(err.response?.data?.error || 'Purchase failed', 'error');
     }

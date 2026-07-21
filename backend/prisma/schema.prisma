@@ -34,3 +34,21 @@ model Vehicle {
 
   @@map("vehicles")
 }
+
+model Purchase {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  receiptNo     String   @unique
+  buyerId       String   @db.ObjectId
+  buyerName     String
+  buyerEmail    String
+  buyerCategory String
+  vehicleId     String   @db.ObjectId
+  make          String
+  model         String
+  category      String
+  price         Float
+  sellerName    String   @default("Antigravity Dealership Group Ltd.")
+  createdAt     DateTime @default(now())
+
+  @@map("purchases")
+}

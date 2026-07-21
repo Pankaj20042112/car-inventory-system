@@ -246,13 +246,19 @@ describe('Vehicles and Inventory API', () => {
   });
 
   describe('POST /api/vehicles/:id/purchase', () => {
-    it('should allow purchasing a vehicle, decreasing its quantity', async () => {
+    it('should allow purchasing a vehicle, decreasing its quantity and returning transaction details', async () => {
       const res = await request(app)
         .post(`/api/vehicles/${testVehicleId}/purchase`)
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.quantity).toEqual(4); // 5 -> 4
+      expect(res.body).toHaveProperty('vehicle');
+      expect(res.body).toHaveProperty('purchase');
+      expect(res.body.vehicle.quantity).toEqual(4); // 5 -> 4
+      expect(res.body.purchase).toHaveProperty('receiptNo');
+      expect(res.body.purchase.buyerName).toEqual('Test User');
+      expect(res.body.purchase.buyerEmail).toEqual('test_user@example.com');
+      expect(res.body.purchase.make).toEqual('Toyota');
 
       const check = await prisma.vehicle.findUnique({ where: { id: testVehicleId } });
       expect(check.quantity).toEqual(4);
