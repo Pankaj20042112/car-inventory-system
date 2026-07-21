@@ -47,7 +47,7 @@ model Purchase {
   model         String
   category      String
   price         Float
-  sellerName    String   @default("Antigravity Dealership Group Ltd.")
+  sellerName    String   @default("VeloCity Systems Dealership Group Ltd.")
   createdAt     DateTime @default(now())
 
   @@map("purchases")

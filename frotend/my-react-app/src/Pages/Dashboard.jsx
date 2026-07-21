@@ -70,7 +70,7 @@ const Dashboard = () => {
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text('ANTIGRAVITY LUXURY DEALERSHIP', 15, 20);
+      doc.text('VELOCITY SYSTEMS LUXURY DEALERSHIP', 15, 20);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -102,10 +102,10 @@ const Dashboard = () => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(51, 65, 85);
-      doc.text('Antigravity Dealership Group Ltd.', 15, 67);
+      doc.text('VeloCity Systems Dealership Group Ltd.', 15, 67);
       doc.text('100 Innovation Way, Tech District', 15, 73);
       doc.text('Silicon Valley, CA 94025', 15, 79);
-      doc.text('Email: sales@antigravitydealership.com', 15, 85);
+      doc.text('Email: sales@velocitysystemsdealership.com', 15, 85);
       doc.text('Registry Lic: LIC-99381-AGY', 15, 91);
 
       // Buyer Info
@@ -206,7 +206,7 @@ const Dashboard = () => {
       doc.setFontSize(8.5);
       doc.setTextColor(148, 163, 184);
       doc.text('Terms: All vehicle sales include standard dealer warranties and manufacturer documentation.', 15, 230);
-      doc.text('For assistance, please email support@antigravitydealership.com.', 15, 236);
+      doc.text('For assistance, please email support@velocitysystemsdealership.com.', 15, 236);
 
       // Save PDF
       const pdfName = `receipt_${vehicle.make.toLowerCase()}_${vehicle.model.toLowerCase()}.pdf`;
