@@ -61,105 +61,160 @@ const Dashboard = () => {
         format: 'a4'
       });
 
-      // Header Banner Background
+      // 1. Header Banner Background
       doc.setFillColor(15, 23, 42); // Slate 900
-      doc.rect(0, 0, 210, 40, 'F');
+      doc.rect(0, 0, 210, 45, 'F');
 
       // Header Banner Text
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
-      doc.text('ANTIGRAVITY LUXURY SHOWROOM', 15, 20);
+      doc.setFontSize(22);
+      doc.text('ANTIGRAVITY LUXURY DEALERSHIP', 15, 20);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
-      doc.setTextColor(194, 205, 230);
-      doc.text('Premium Car Dealership & Inventory Receipt', 15, 28);
-
-      // Invoice Header
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(15, 23, 42);
-      doc.text('TRANSACTION RECEIPT', 15, 55);
-
-      // Metadata block
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor(100, 116, 139);
+      doc.setTextColor(156, 163, 175);
+      doc.text('Premium Vehicles & Luxury Automobile Services', 15, 28);
+      doc.text('Authorized Agent System', 15, 34);
 
       const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
       const dateStr = new Date().toLocaleString();
 
-      doc.text(`Receipt Number: ${receiptNo}`, 15, 63);
-      doc.text(`Date of Purchase: ${dateStr}`, 15, 69);
-      doc.text(`Buyer Username: ${user?.username || 'Guest Customer'}`, 15, 75);
-
-      // Separator line
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.5);
-      doc.line(15, 82, 195, 82);
-
-      // Specs Section
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(99, 102, 241); // Indigo
-      doc.text('VEHICLE SPECIFICATIONS', 15, 90);
-
-      // Specs Table Box
-      doc.setFillColor(248, 250, 252);
-      doc.rect(15, 95, 180, 52, 'F');
-      doc.rect(15, 95, 180, 52, 'S');
-
-      // Spec Fields
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(71, 85, 105);
-      doc.text('Manufacturer (Make):', 20, 103);
-      doc.text('Vehicle Model:', 20, 111);
-      doc.text('Vehicle Category:', 20, 119);
-      doc.text('Stock Reference ID:', 20, 127);
-      doc.text('Payment Status:', 20, 135);
-
-      // Spec Values
+      doc.setTextColor(255, 255, 255);
+      doc.text(`RECEIPT: ${receiptNo}`, 145, 20);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(15, 23, 42);
-      doc.text(vehicle.make || 'N/A', 75, 103);
-      doc.text(vehicle.model || 'N/A', 75, 111);
-      doc.text(vehicle.category || 'N/A', 75, 119);
-      doc.text(vehicle.id || 'N/A', 75, 127);
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 145, 26);
+      doc.text('Status: PAID', 145, 32);
 
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(16, 185, 129); // Emerald 500
-      doc.text('PAID & SHIPPED', 75, 135);
+      // Indigo Accent Line
+      doc.setFillColor(99, 102, 241); // Indigo 500
+      doc.rect(0, 45, 210, 2, 'F');
 
-      // Divider
-      doc.setDrawColor(226, 232, 240);
-      doc.line(15, 155, 195, 155);
-
-      // Totals
+      // 2. Seller and Buyer Information Columns (Side-by-Side)
+      
+      // Seller Info (Left Column)
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(15, 23, 42);
-      doc.text('Total Amount Paid:', 105, 168);
+      doc.text('SELLER / DEALER:', 15, 60);
 
-      doc.setFontSize(16);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      doc.text('Antigravity Dealership Group Ltd.', 15, 67);
+      doc.text('100 Innovation Way, Tech District', 15, 73);
+      doc.text('Silicon Valley, CA 94025', 15, 79);
+      doc.text('Email: sales@antigravitydealership.com', 15, 85);
+      doc.text('Registry Lic: LIC-99381-AGY', 15, 91);
+
+      // Buyer Info (Right Column)
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text('BUYER / CUSTOMER:', 110, 60);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      doc.text(`Name: ${user?.name || 'N/A'}`, 110, 67);
+      doc.text(`Username: ${user?.username || 'N/A'}`, 110, 73);
+      doc.text(`Email: ${user?.email || 'N/A'}`, 110, 79);
+      doc.text(`Category: ${user?.category || 'Customer'}`, 110, 85);
+      doc.text(`Account ID: ${user?.id || 'Guest'}`, 110, 91);
+
+      // Horizontal Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(15, 100, 195, 100);
+
+      // 3. Purchase Details Section
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(99, 102, 241); // Indigo
+      doc.text('PURCHASED ITEM DESCRIPTION', 15, 110);
+
+      // Table Header Box
+      doc.setFillColor(241, 245, 249);
+      doc.rect(15, 115, 180, 8, 'F');
+      doc.rect(15, 115, 180, 8, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text('ITEM SPECIFICATION', 20, 120.5);
+      doc.text('VALUE / DESCRIPTION', 85, 120.5);
+
+      // Table Content Grid Box
+      doc.setDrawColor(203, 213, 225);
+      doc.setFillColor(255, 255, 255);
+      doc.rect(15, 123, 180, 48, 'S');
+
+      // Table rows mapping
+      const rows = [
+        { label: 'Vehicle Manufacturer', val: vehicle.make || 'N/A' },
+        { label: 'Model Name', val: vehicle.model || 'N/A' },
+        { label: 'Body Category', val: vehicle.category || 'N/A' },
+        { label: 'Unique Identifier (ID)', val: vehicle.id || 'N/A' },
+        { label: 'Transaction Timestamp', val: dateStr },
+        { label: 'Payment Method', val: 'Digital Authorization / Token' }
+      ];
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+
+      rows.forEach((row, index) => {
+        const yPos = 129 + index * 7;
+        doc.setFont('helvetica', 'bold');
+        doc.text(row.label, 20, yPos);
+        doc.setFont('helvetica', 'normal');
+        doc.text(row.val, 85, yPos);
+        if (index < rows.length - 1) {
+          doc.line(15, yPos + 2.5, 195, yPos + 2.5);
+        }
+      });
+
+      // 4. Totals Block
+      doc.setFillColor(248, 250, 252);
+      doc.rect(110, 178, 85, 18, 'F');
+      doc.rect(110, 178, 85, 18, 'S');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      doc.text('TOTAL AMOUNT:', 115, 189);
+
+      doc.setFontSize(14);
       doc.setTextColor(99, 102, 241); // Indigo
       const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(vehicle.price);
-      doc.text(formattedPrice, 150, 168);
+      doc.text(formattedPrice, 150, 189);
+
+      // Stamp / Signatures
+      doc.setDrawColor(16, 185, 129); // Emerald 500
+      doc.setLineWidth(1);
+      doc.rect(20, 178, 45, 18, 'S');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(16, 185, 129);
+      doc.text('AUTHORIZED', 26, 185);
+      doc.text('PAID STAMP', 28, 191);
 
       // Footer
       doc.setFont('helvetica', 'italic');
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setTextColor(148, 163, 184);
-      doc.text('Thank you for choosing Antigravity Showrooms! Have a safe and pleasant drive.', 15, 195);
-      doc.text('For customer support, please contact us at support@antigravitydealership.com', 15, 201);
+      doc.text('Terms: All vehicle sales include standard dealer warranties and manufacturer documentation.', 15, 230);
+      doc.text('For assistance, please email support@antigravitydealership.com.', 15, 236);
 
-      // Download
+      // Save PDF
       const pdfName = `receipt_${vehicle.make.toLowerCase()}_${vehicle.model.toLowerCase()}.pdf`;
       doc.save(pdfName);
     } catch (e) {
       console.error('Failed to generate PDF:', e);
-      showToast('Purchase succeeded, but failed to generate receipt PDF', 'error');
+      showToast('Purchase succeeded, but failed to generate detailed PDF receipt', 'error');
     }
   };
 
