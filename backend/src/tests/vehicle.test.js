@@ -60,7 +60,8 @@ afterAll(async () => {
 
 describe('Vehicles and Inventory API', () => {
   beforeEach(async () => {
-    // Clear vehicles and insert test vehicles
+    // Clear purchases and vehicles before each test
+    await prisma.purchase.deleteMany({});
     await prisma.vehicle.deleteMany({});
 
     const car = await prisma.vehicle.create({

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/Authcontext';
 import { addVehicle } from '../services/vehicalService';
 import { PlusCircle, ArrowLeft, AlertCircle, Upload, Image, Sparkles, X } from 'lucide-react';
 
@@ -11,6 +12,7 @@ const samplePhotos = [
 ];
 
 const AddVehicle = () => {
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -77,7 +79,11 @@ const AddVehicle = () => {
         quantity: qtyNum,
         imageUrl: form.imageUrl.trim() || undefined,
       });
-      navigate('/admin');
+      if (user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to add vehicle. Try again.');
     } finally {

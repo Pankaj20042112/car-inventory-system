@@ -19,40 +19,15 @@ exports.createVehicle = async (req, res) => {
       return res.status(400).json({ error: 'price must be a non-negative number' });
     }
 
-    // Check duplicate in-memory for 100% reliable database-independent case-insensitivity
-    const allVehicles = await prisma.vehicle.findMany();
-    const existingVehicle = allVehicles.find(
-      (v) =>
-        v.make.toLowerCase() === make.toLowerCase() &&
-        v.model.toLowerCase() === model.toLowerCase() &&
-        v.category.toLowerCase() === category.toLowerCase()
-    );
-
-    if (existingVehicle) {
-      // Update quantity, price and optional imageUrl of the existing vehicle
-      const dataToUpdate = {
-        quantity: existingVehicle.quantity + qty,
-        price: prc
-      };
-      if (imageUrl !== undefined) {
-        dataToUpdate.imageUrl = imageUrl;
-      }
-      const updated = await prisma.vehicle.update({
-        where: { id: existingVehicle.id },
-        data: dataToUpdate
-      });
-      return res.status(200).json(updated);
-    }
-
-    // Otherwise, create a new vehicle entry
+    // Create a new vehicle entry in MongoDB
     const newVehicle = await prisma.vehicle.create({
       data: {
-        make,
-        model,
-        category,
+        make: make.trim(),
+        model: model.trim(),
+        category: category.trim(),
         price: prc,
         quantity: qty,
-        imageUrl: imageUrl || null
+        imageUrl: imageUrl ? imageUrl.trim() : null
       }
     });
 
