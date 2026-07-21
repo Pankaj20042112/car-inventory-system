@@ -8,13 +8,38 @@ exports.createVehicle = async (req, res) => {
       return res.status(400).json({ error: 'make, model, category, and price are required' });
     }
 
+    const qty = quantity !== undefined ? parseInt(quantity) : 0;
+    const prc = parseFloat(price);
+
+    // Check if vehicle with same make, model, and category (case-insensitive) already exists
+    const existingVehicle = await prisma.vehicle.findFirst({
+      where: {
+        make: { equals: make, mode: 'insensitive' },
+        model: { equals: model, mode: 'insensitive' },
+        category: { equals: category, mode: 'insensitive' }
+      }
+    });
+
+    if (existingVehicle) {
+      // Update quantity and price of the existing vehicle
+      const updated = await prisma.vehicle.update({
+        where: { id: existingVehicle.id },
+        data: {
+          quantity: existingVehicle.quantity + qty,
+          price: prc
+        }
+      });
+      return res.status(200).json(updated);
+    }
+
+    // Otherwise, create a new vehicle entry
     const newVehicle = await prisma.vehicle.create({
       data: {
         make,
         model,
         category,
-        price: parseFloat(price),
-        quantity: quantity !== undefined ? parseInt(quantity) : 0
+        price: prc,
+        quantity: qty
       }
     });
 
