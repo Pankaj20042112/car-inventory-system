@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { updateVehicle, getVehicles } from '../services/vehicalService';
-import { Save, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Upload, Sparkles, X } from 'lucide-react';
+
+const samplePhotos = [
+  { name: 'Luxury SUV', url: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80' },
+  { name: 'Sports Coupe', url: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80' },
+  { name: 'Executive Sedan', url: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80' },
+  { name: 'Pickup Truck', url: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?auto=format&fit=crop&w=800&q=80' },
+];
 
 const EditVehicle = () => {
   const navigate = useNavigate();
@@ -65,6 +72,22 @@ const EditVehicle = () => {
     }));
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        setError('Image file size must be less than 3MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({ ...prev, imageUrl: reader.result }));
+        setError('');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -117,7 +140,7 @@ const EditVehicle = () => {
       <div className="glass-panel p-8 rounded-3xl border border-white/5 shadow-2xl space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-white mb-1">Edit Vehicle Details</h2>
-          <p className="text-sm text-gray-400">Modify properties of vehicle record (ID: {id}).</p>
+          <p className="text-sm text-gray-400">Modify properties and photo of vehicle record (ID: {id}).</p>
         </div>
 
         {error && (
@@ -127,7 +150,7 @@ const EditVehicle = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
             {/* Make */}
             <div className="flex flex-col space-y-1">
@@ -205,17 +228,76 @@ const EditVehicle = () => {
             </div>
           </div>
 
-          {/* Image URL */}
-          <div className="flex flex-col space-y-1">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Vehicle Photo URL (Optional)</label>
-            <input
-              type="url"
-              name="imageUrl"
-              value={form.imageUrl}
-              onChange={handleChange}
-              placeholder="e.g. https://images.unsplash.com/photo-..."
-              className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
-            />
+          {/* Vehicle Photo Upload & Presets */}
+          <div className="flex flex-col space-y-3 pt-2 border-t border-white/5">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center justify-between">
+              <span>Vehicle Photo</span>
+              <span className="text-[10px] text-indigo-400">Stores in Database</span>
+            </label>
+
+            {/* Live Preview If Image Exists */}
+            {form.imageUrl ? (
+              <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-white/10 group">
+                <img
+                  src={form.imageUrl}
+                  alt="Vehicle Preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, imageUrl: '' }))}
+                  className="absolute top-3 right-3 bg-slate-950/80 text-white p-2 rounded-full border border-white/20 hover:bg-red-600 transition-colors"
+                  title="Remove Photo"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : null}
+
+            {/* Input Options: File Upload or Sample Presets or URL */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* File Upload Button */}
+              <label className="flex items-center justify-center space-x-2 bg-slate-950 hover:bg-slate-900 border border-dashed border-white/20 hover:border-indigo-500 rounded-xl p-3.5 cursor-pointer text-gray-300 text-xs font-semibold transition-all">
+                <Upload className="h-4 w-4 text-indigo-400" />
+                <span>Upload from Device</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+
+              {/* URL Input */}
+              <input
+                type="text"
+                name="imageUrl"
+                value={form.imageUrl}
+                onChange={handleChange}
+                placeholder="Or paste Image Web URL..."
+                className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
+              />
+            </div>
+
+            {/* Presets Row */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center space-x-1">
+                <Sparkles className="h-3 w-3 text-indigo-400" />
+                <span>Or Select Sample Preset Photo:</span>
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {samplePhotos.map((photo) => (
+                  <button
+                    key={photo.name}
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, imageUrl: photo.url }))}
+                    className="text-[11px] bg-slate-900 hover:bg-indigo-600/20 border border-white/10 hover:border-indigo-500 text-gray-300 hover:text-indigo-300 px-3 py-1.5 rounded-lg transition-all"
+                  >
+                    + {photo.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Submit Buttons */}
