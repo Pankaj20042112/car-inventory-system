@@ -12,7 +12,8 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Mount routes
 app.use('/api/auth', authRoutes);
@@ -20,6 +21,9 @@ app.use('/api/vehicles', vehicleRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large' || err.name === 'PayloadTooLargeError') {
+    return res.status(413).json({ error: 'Image file size is too large. Please upload an image under 10MB.' });
+  }
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error' });
 });
