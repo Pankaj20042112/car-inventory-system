@@ -30,13 +30,25 @@ const VehicleCard = ({ vehicle, onPurchase, onEdit, onRestock, onDelete, isAdmin
     );
   };
 
+  const [imgError, setImgError] = React.useState(false);
+  const showImage = vehicle.imageUrl && !imgError;
+
   return (
     <div className="glass-panel glass-panel-hover rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 shadow-lg transition-all duration-300">
-      {/* Vehicle Vector Render */}
-      <div className="h-44 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 relative flex items-center justify-center p-6 border-b border-white/5">
-        <div className="w-24 h-24 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]">
-          {renderCarSvg(vehicle.category)}
-        </div>
+      {/* Vehicle Render (Image or SVG Fallback) */}
+      <div className="h-44 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 relative flex items-center justify-center border-b border-white/5 overflow-hidden">
+        {showImage ? (
+          <img
+            src={vehicle.imageUrl}
+            alt={`${vehicle.make} ${vehicle.model}`}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-24 h-24 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+            {renderCarSvg(vehicle.category)}
+          </div>
+        )}
         
         {/* Category Badge */}
         <span className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-[10px] uppercase font-bold tracking-wider text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-full">

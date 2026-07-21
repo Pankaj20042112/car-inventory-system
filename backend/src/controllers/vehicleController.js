@@ -2,7 +2,7 @@ const prisma = require('../config/db');
 
 exports.createVehicle = async (req, res) => {
   try {
-    const { make, model, category, price, quantity } = req.body;
+    const { make, model, category, price, quantity, imageUrl } = req.body;
 
     if (!make || !model || !category || price === undefined) {
       return res.status(400).json({ error: 'make, model, category, and price are required' });
@@ -29,13 +29,17 @@ exports.createVehicle = async (req, res) => {
     );
 
     if (existingVehicle) {
-      // Update quantity and price of the existing vehicle
+      // Update quantity, price and optional imageUrl of the existing vehicle
+      const dataToUpdate = {
+        quantity: existingVehicle.quantity + qty,
+        price: prc
+      };
+      if (imageUrl !== undefined) {
+        dataToUpdate.imageUrl = imageUrl;
+      }
       const updated = await prisma.vehicle.update({
         where: { id: existingVehicle.id },
-        data: {
-          quantity: existingVehicle.quantity + qty,
-          price: prc
-        }
+        data: dataToUpdate
       });
       return res.status(200).json(updated);
     }
@@ -47,7 +51,8 @@ exports.createVehicle = async (req, res) => {
         model,
         category,
         price: prc,
-        quantity: qty
+        quantity: qty,
+        imageUrl: imageUrl || null
       }
     });
 
@@ -108,7 +113,7 @@ exports.searchVehicles = async (req, res) => {
 exports.updateVehicle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { make, model, category, price, quantity } = req.body;
+    const { make, model, category, price, quantity, imageUrl } = req.body;
 
     // Check if ID is a valid MongoDB ObjectId length
     if (!id || id.length !== 24) {
@@ -124,6 +129,7 @@ exports.updateVehicle = async (req, res) => {
     if (make !== undefined) data.make = make;
     if (model !== undefined) data.model = model;
     if (category !== undefined) data.category = category;
+    if (imageUrl !== undefined) data.imageUrl = imageUrl;
 
     if (price !== undefined) {
       const prc = parseFloat(price);

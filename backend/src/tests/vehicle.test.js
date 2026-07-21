@@ -105,13 +105,15 @@ describe('Vehicles and Inventory API', () => {
           model: 'F-150',
           category: 'Truck',
           price: 35000,
-          quantity: 10
+          quantity: 10,
+          imageUrl: 'https://example.com/ford.jpg'
         });
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
       expect(res.body.make).toEqual('Ford');
       expect(res.body.quantity).toEqual(10);
+      expect(res.body.imageUrl).toEqual('https://example.com/ford.jpg');
     });
 
     it('should allow a regular user to add a new vehicle', async () => {
@@ -123,13 +125,15 @@ describe('Vehicles and Inventory API', () => {
           model: 'F-150',
           category: 'Truck',
           price: 35000,
-          quantity: 10
+          quantity: 10,
+          imageUrl: 'https://example.com/ford-user.jpg'
         });
 
       expect(res.statusCode).toEqual(201);
       expect(res.body).toHaveProperty('id');
       expect(res.body.make).toEqual('Ford');
       expect(res.body.quantity).toEqual(10);
+      expect(res.body.imageUrl).toEqual('https://example.com/ford-user.jpg');
     });
 
     it('should deny unauthenticated requests', async () => {
@@ -196,12 +200,14 @@ describe('Vehicles and Inventory API', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           price: 25000,
-          quantity: 6
+          quantity: 6,
+          imageUrl: 'https://example.com/toyota-updated.jpg'
         });
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.price).toEqual(25000);
       expect(res.body.quantity).toEqual(6);
+      expect(res.body.imageUrl).toEqual('https://example.com/toyota-updated.jpg');
       expect(res.body.make).toEqual('Toyota'); // Unchanged fields remain
     });
 

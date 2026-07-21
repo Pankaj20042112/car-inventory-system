@@ -12,6 +12,7 @@ const AddVehicle = () => {
     category: '',
     price: '',
     quantity: '0',
+    imageUrl: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,11 +52,13 @@ const AddVehicle = () => {
         category: form.category,
         price: priceNum,
         quantity: qtyNum,
+        imageUrl: form.imageUrl.trim() || undefined,
       });
       navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to add vehicle. Try again.');
     } finally {
+      setForm((prev) => ({ ...prev })); // avoid empty finally issues
       setLoading(false);
     }
   };
@@ -161,6 +164,19 @@ const AddVehicle = () => {
                 className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
               />
             </div>
+          </div>
+
+          {/* Image URL */}
+          <div className="flex flex-col space-y-1">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Vehicle Photo URL (Optional)</label>
+            <input
+              type="url"
+              name="imageUrl"
+              value={form.imageUrl}
+              onChange={handleChange}
+              placeholder="e.g. https://images.unsplash.com/photo-..."
+              className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
+            />
           </div>
 
           {/* Submit Buttons */}
