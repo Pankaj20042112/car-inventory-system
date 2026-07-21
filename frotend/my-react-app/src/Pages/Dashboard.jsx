@@ -4,7 +4,7 @@ import { AuthContext } from '../context/Authcontext';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getVehicles, searchVehicles, purchaseVehicle, restockVehicle, deleteVehicle } from '../services/vehicalService';
-import { Loader2, Plus, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, Sparkles, CheckCircle2, AlertCircle, DollarSign, Package, Car, AlertTriangle, ShieldCheck, Tag, RefreshCw, Filter } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
 const Dashboard = () => {
@@ -13,6 +13,7 @@ const Dashboard = () => {
 
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('All');
   const [toast, setToast] = useState({ message: '', type: '' });
 
   // Load vehicles
@@ -92,9 +93,7 @@ const Dashboard = () => {
       doc.setFillColor(99, 102, 241); // Indigo 500
       doc.rect(0, 45, 210, 2, 'F');
 
-      // 2. Seller and Buyer Information Columns (Side-by-Side)
-      
-      // Seller Info (Left Column)
+      // 2. Seller and Buyer Information Columns
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(15, 23, 42);
@@ -109,7 +108,7 @@ const Dashboard = () => {
       doc.text('Email: sales@antigravitydealership.com', 15, 85);
       doc.text('Registry Lic: LIC-99381-AGY', 15, 91);
 
-      // Buyer Info (Right Column)
+      // Buyer Info
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.setTextColor(15, 23, 42);
@@ -132,7 +131,7 @@ const Dashboard = () => {
       // 3. Purchase Details Section
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
-      doc.setTextColor(99, 102, 241); // Indigo
+      doc.setTextColor(99, 102, 241);
       doc.text('PURCHASED ITEM DESCRIPTION', 15, 110);
 
       // Table Header Box
@@ -187,12 +186,12 @@ const Dashboard = () => {
       doc.text('TOTAL AMOUNT:', 115, 189);
 
       doc.setFontSize(14);
-      doc.setTextColor(99, 102, 241); // Indigo
+      doc.setTextColor(99, 102, 241);
       const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(vehicle.price);
       doc.text(formattedPrice, 150, 189);
 
       // Stamp / Signatures
-      doc.setDrawColor(16, 185, 129); // Emerald 500
+      doc.setDrawColor(16, 185, 129);
       doc.setLineWidth(1);
       doc.rect(20, 178, 45, 18, 'S');
       
@@ -223,11 +222,9 @@ const Dashboard = () => {
     try {
       const responseData = await purchaseVehicle(id);
       showToast(`Vehicle purchased successfully!`);
-      // Update local state
       setVehicles((prev) =>
         prev.map((v) => (v.id === id ? { ...v, quantity: responseData.vehicle.quantity } : v))
       );
-      // Trigger PDF Receipt Download
       generateReceiptPDF(responseData.vehicle, responseData.purchase);
     } catch (err) {
       showToast(err.response?.data?.error || 'Purchase failed', 'error');
@@ -269,15 +266,30 @@ const Dashboard = () => {
     }
   };
 
-  // Edit handler (redirects to edit page)
+  // Edit handler
   const handleEdit = (vehicle) => {
     navigate(`/admin/edit/${vehicle.id}`, { state: { vehicle } });
   };
 
   const isAdmin = user?.role === 'admin';
 
+  // Metrics calculation
+  const totalInventoryValue = vehicles.reduce((acc, v) => acc + (v.price || 0) * (v.quantity || 0), 0);
+  const totalStockUnits = vehicles.reduce((acc, v) => acc + (v.quantity || 0), 0);
+  const outOfStockCount = vehicles.filter((v) => v.quantity <= 0).length;
+
+  // Filter vehicles by category pill
+  const filteredVehicles = vehicles.filter((v) => {
+    if (activeCategoryFilter === 'All') return true;
+    if (activeCategoryFilter === 'In Stock') return v.quantity > 0;
+    if (activeCategoryFilter === 'Out of Stock') return v.quantity <= 0;
+    return v.category.toLowerCase() === activeCategoryFilter.toLowerCase();
+  });
+
+  const categoriesList = ['All', 'SUV', 'Sedan', 'Truck', 'In Stock', 'Out of Stock'];
+
   return (
-    <div className="flex-grow py-12 px-4 max-w-7xl mx-auto w-full space-y-8">
+    <div className="flex-grow py-8 px-4 max-w-7xl mx-auto w-full space-y-8">
       {/* Toast Alert */}
       {toast.message && (
         <div className={`fixed bottom-6 right-6 flex items-center space-x-3 px-6 py-4 rounded-2xl shadow-2xl border z-50 animate-bounce ${
@@ -290,26 +302,143 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2">Showroom Inventory</h1>
-          <p className="text-gray-400 text-sm">Explore, search, and manage high-quality vehicles instantly.</p>
-        </div>
+      {/* User Welcome Hero Banner */}
+      <div className="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-950">
+        <div className="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-3">
+              <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                <span>{isAdmin ? 'Administrator Portal' : 'Showroom Hub'}</span>
+              </span>
+              {user?.category && (
+                <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5">
+                  <Tag className="h-3.5 w-3.5" />
+                  <span>{user.category}</span>
+                </span>
+              )}
+            </div>
 
-        {user && (
-          <button
-            onClick={() => navigate('/admin/add')}
-            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-glow transition-all duration-200"
-          >
-            <Plus className="h-4.5 w-4.5" />
-            <span>Add New Vehicle</span>
-          </button>
-        )}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Welcome back, <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{user?.name || user?.username || 'Guest'}</span> 👋
+            </h1>
+            <p className="text-sm text-gray-400 max-w-xl">
+              Monitor inventory stats, search vehicle models, and perform instant purchases with automatic PDF receipt generation.
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={loadVehicles}
+              className="flex items-center space-x-2 bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-gray-300 font-semibold px-4 py-3 rounded-xl text-sm transition-all duration-200"
+              title="Reload catalog"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+
+            {user && (
+              <button
+                onClick={() => navigate('/admin/add')}
+                className="flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-glow transition-all duration-200"
+              >
+                <Plus className="h-4.5 w-4.5" />
+                <span>Add Vehicle</span>
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Search Bar */}
+      {/* KPI Analytics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Fleet Valuation */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
+          <div className="p-3.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl">
+            <DollarSign className="h-6 w-6" />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Fleet Valuation</span>
+            <div className="text-2xl font-black text-white">
+              ${totalInventoryValue.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        {/* Catalog Models */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
+          <div className="p-3.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-2xl">
+            <Car className="h-6 w-6" />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Vehicle Models</span>
+            <div className="text-2xl font-black text-white">
+              {vehicles.length} Models
+            </div>
+          </div>
+        </div>
+
+        {/* Total Stock Units */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
+          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl">
+            <Package className="h-6 w-6" />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Units in Stock</span>
+            <div className="text-2xl font-black text-white">
+              {totalStockUnits} Units
+            </div>
+          </div>
+        </div>
+
+        {/* Stock Alerts */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
+          <div className={`p-3.5 rounded-2xl border ${
+            outOfStockCount > 0
+              ? 'bg-red-500/10 border-red-500/20 text-red-400'
+              : 'bg-slate-800 border-white/5 text-gray-400'
+          }`}>
+            <AlertTriangle className="h-6 w-6" />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stock Alerts</span>
+            <div className={`text-2xl font-black ${outOfStockCount > 0 ? 'text-red-400' : 'text-white'}`}>
+              {outOfStockCount} Out of Stock
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar Component */}
       <SearchBar onSearch={handleSearch} />
+
+      {/* Category Filter Quick-Pills */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+        <div className="flex items-center space-x-2">
+          <Filter className="h-4 w-4 text-indigo-400" />
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quick Category Filter:</span>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {categoriesList.map((cat) => {
+            const isActive = activeCategoryFilter === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategoryFilter(cat)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
+                  isActive
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-glow'
+                    : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border-white/5 hover:border-white/10'
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Main Grid View */}
       {loading ? (
@@ -317,23 +446,26 @@ const Dashboard = () => {
           <Loader2 className="h-12 w-12 text-indigo-500 animate-spin" />
           <span className="text-gray-400 font-medium">Synchronizing live stock...</span>
         </div>
-      ) : vehicles.length === 0 ? (
+      ) : filteredVehicles.length === 0 ? (
         <div className="glass-panel text-center py-20 px-4 rounded-3xl border border-white/5 shadow-md">
           <Sparkles className="h-12 w-12 text-indigo-400/50 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">No Vehicles Found</h3>
           <p className="text-gray-400 text-sm max-w-sm mx-auto mb-6">
-            We couldn't find any vehicles matching your search criteria. Try modifying your filters.
+            We couldn't find any vehicles matching your filter criteria. Try choosing a different category or refreshing.
           </p>
           <button
-            onClick={loadVehicles}
+            onClick={() => {
+              setActiveCategoryFilter('All');
+              loadVehicles();
+            }}
             className="bg-slate-900 border border-white/10 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-950 transition-all duration-200"
           >
-            Refresh Catalog
+            Reset Filters
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {vehicles.map((vehicle) => (
+          {filteredVehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
               vehicle={vehicle}
