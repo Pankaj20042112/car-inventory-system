@@ -19,7 +19,10 @@ const startServer = async () => {
         data: {
           username: 'admin',
           password: hashedPassword,
-          role: 'admin'
+          role: 'admin',
+          name: 'System Administrator',
+          email: 'admin@dealership.com',
+          category: 'admin'
         }
       });
       console.log('Successfully pre-seeded default admin account (admin / admin123)');

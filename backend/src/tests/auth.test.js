@@ -22,7 +22,10 @@ describe('Authentication API', () => {
         .post('/api/auth/register')
         .send({
           username: 'john_doe',
-          password: 'password123'
+          password: 'password123',
+          name: 'John Doe',
+          email: 'john@example.com',
+          category: 'Customer'
         });
 
       expect(res.statusCode).toEqual(201);
@@ -30,6 +33,9 @@ describe('Authentication API', () => {
       expect(res.body).toHaveProperty('user');
       expect(res.body.user.username).toEqual('john_doe');
       expect(res.body.user.role).toEqual('user');
+      expect(res.body.user.name).toEqual('John Doe');
+      expect(res.body.user.email).toEqual('john@example.com');
+      expect(res.body.user.category).toEqual('Customer');
       expect(res.body.user).not.toHaveProperty('password');
 
       // Verify db entry
@@ -44,7 +50,10 @@ describe('Authentication API', () => {
         .send({
           username: 'admin_user',
           password: 'adminpassword',
-          role: 'admin'
+          role: 'admin',
+          name: 'Admin User',
+          email: 'admin_user@example.com',
+          category: 'Dealer'
         });
 
       expect(res.statusCode).toEqual(201);
@@ -57,7 +66,10 @@ describe('Authentication API', () => {
         .post('/api/auth/register')
         .send({
           username: 'john_doe',
-          password: 'password123'
+          password: 'password123',
+          name: 'John Doe',
+          email: 'john@example.com',
+          category: 'Customer'
         });
 
       // Try registering same username
@@ -65,7 +77,10 @@ describe('Authentication API', () => {
         .post('/api/auth/register')
         .send({
           username: 'john_doe',
-          password: 'differentpassword'
+          password: 'differentpassword',
+          name: 'John Doe Two',
+          email: 'john2@example.com',
+          category: 'Customer'
         });
 
       expect(res.statusCode).toEqual(400);
@@ -76,7 +91,11 @@ describe('Authentication API', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          username: ''
+          username: '',
+          password: 'password123',
+          name: 'John Doe',
+          email: 'john@example.com',
+          category: 'Customer'
         });
 
       expect(res.statusCode).toEqual(400);
@@ -92,7 +111,10 @@ describe('Authentication API', () => {
         .send({
           username: 'login_test',
           password: 'password123',
-          role: 'user'
+          role: 'user',
+          name: 'Login Test User',
+          email: 'logintest@example.com',
+          category: 'Customer'
         });
     });
 

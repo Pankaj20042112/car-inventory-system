@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
-import { UserPlus, User, KeyRound, ShieldAlert, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { UserPlus, User, KeyRound, ShieldAlert, AlertCircle, CheckCircle2, Mail, Tag } from 'lucide-react';
 
 const Register = () => {
   const { registerUser } = useContext(AuthContext);
@@ -9,8 +9,11 @@ const Register = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [category, setCategory] = useState('Customer');
   const [role, setRole] = useState('user');
-  
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await registerUser(username, password, role);
+      await registerUser(username, password, role, name, email, category);
       setSuccess('Account registered successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
@@ -64,6 +67,42 @@ const Register = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name */}
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Full Name</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                  <User className="h-4 w-4" />
+                </span>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter full name"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
+                />
+              </div>
+            </div>
+
+            {/* Email Address */}
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Address</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                  <Mail className="h-4 w-4" />
+                </span>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email address"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
+                />
+              </div>
+            </div>
+
             {/* Username */}
             <div className="flex flex-col space-y-1">
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Username</label>
@@ -97,6 +136,25 @@ const Register = () => {
                   placeholder="Create password"
                   className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
                 />
+              </div>
+            </div>
+
+            {/* Category Dropdown */}
+            <div className="flex flex-col space-y-1">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Category</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-500">
+                  <Tag className="h-4 w-4" />
+                </span>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200 appearance-none"
+                >
+                  <option value="Customer">Customer</option>
+                  <option value="Dealer">Dealer</option>
+                  <option value="Visitor">Visitor</option>
+                </select>
               </div>
             </div>
 

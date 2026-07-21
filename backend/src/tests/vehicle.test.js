@@ -19,7 +19,10 @@ beforeAll(async () => {
     .send({
       username: 'test_admin',
       password: 'adminpassword',
-      role: 'admin'
+      role: 'admin',
+      name: 'Test Admin',
+      email: 'test_admin@example.com',
+      category: 'admin'
     });
 
   const adminLogin = await request(app)
@@ -36,7 +39,10 @@ beforeAll(async () => {
     .send({
       username: 'test_user',
       password: 'userpassword',
-      role: 'user'
+      role: 'user',
+      name: 'Test User',
+      email: 'test_user@example.com',
+      category: 'Customer'
     });
 
   const userLogin = await request(app)
