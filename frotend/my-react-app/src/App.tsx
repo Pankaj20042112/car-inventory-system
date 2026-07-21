@@ -55,7 +55,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="relative flex flex-col min-h-screen bg-[#060913] text-gray-100 selection:bg-indigo-500/30 selection:text-white overflow-hidden">
+        <div className="relative flex flex-col min-h-screen bg-[#131b2e] text-gray-100 selection:bg-indigo-500/30 selection:text-white overflow-hidden">
           {/* Animated Colorful Background Layer */}
           <div className="colorful-bg-wrapper">
             <div className="colorful-orb-1" />
