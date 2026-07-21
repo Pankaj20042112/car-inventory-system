@@ -1,4 +1,3 @@
-process.env.MONGODB_URI = process.env.MONGODB_URI_TEST || 'mongodb://127.0.0.1:27017/car_dealership_test';
 const request = require('supertest');
 const app = require('../app');
 const prisma = require('../config/db');

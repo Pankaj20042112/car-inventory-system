@@ -11,14 +11,22 @@ exports.createVehicle = async (req, res) => {
     const qty = quantity !== undefined ? parseInt(quantity) : 0;
     const prc = parseFloat(price);
 
-    // Check if vehicle with same make, model, and category (case-insensitive) already exists
-    const existingVehicle = await prisma.vehicle.findFirst({
-      where: {
-        make: { equals: make, mode: 'insensitive' },
-        model: { equals: model, mode: 'insensitive' },
-        category: { equals: category, mode: 'insensitive' }
-      }
-    });
+    // Guard against NaN or negative values
+    if (isNaN(qty) || qty < 0) {
+      return res.status(400).json({ error: 'quantity must be a non-negative integer' });
+    }
+    if (isNaN(prc) || prc < 0) {
+      return res.status(400).json({ error: 'price must be a non-negative number' });
+    }
+
+    // Check duplicate in-memory for 100% reliable database-independent case-insensitivity
+    const allVehicles = await prisma.vehicle.findMany();
+    const existingVehicle = allVehicles.find(
+      (v) =>
+        v.make.toLowerCase() === make.toLowerCase() &&
+        v.model.toLowerCase() === model.toLowerCase() &&
+        v.category.toLowerCase() === category.toLowerCase()
+    );
 
     if (existingVehicle) {
       // Update quantity and price of the existing vehicle
@@ -61,29 +69,36 @@ exports.getVehicles = async (req, res) => {
 exports.searchVehicles = async (req, res) => {
   try {
     const { make, model, category, minPrice, maxPrice } = req.query;
-    const where = {};
 
+    let vehicles = await prisma.vehicle.findMany();
+
+    // Perform case-insensitive matching in memory
     if (make) {
-      where.make = { contains: make, mode: 'insensitive' };
+      const searchMake = make.toLowerCase();
+      vehicles = vehicles.filter((v) => v.make.toLowerCase().includes(searchMake));
     }
     if (model) {
-      where.model = { contains: model, mode: 'insensitive' };
+      const searchModel = model.toLowerCase();
+      vehicles = vehicles.filter((v) => v.model.toLowerCase().includes(searchModel));
     }
     if (category) {
-      where.category = { contains: category, mode: 'insensitive' };
+      const searchCategory = category.toLowerCase();
+      vehicles = vehicles.filter((v) => v.category.toLowerCase().includes(searchCategory));
     }
 
-    if ((minPrice !== undefined && minPrice !== '') || (maxPrice !== undefined && maxPrice !== '')) {
-      where.price = {};
-      if (minPrice !== undefined && minPrice !== '') {
-        where.price.gte = parseFloat(minPrice);
+    if (minPrice !== undefined && minPrice !== '') {
+      const minVal = parseFloat(minPrice);
+      if (!isNaN(minVal)) {
+        vehicles = vehicles.filter((v) => v.price >= minVal);
       }
-      if (maxPrice !== undefined && maxPrice !== '') {
-        where.price.lte = parseFloat(maxPrice);
+    }
+    if (maxPrice !== undefined && maxPrice !== '') {
+      const maxVal = parseFloat(maxPrice);
+      if (!isNaN(maxVal)) {
+        vehicles = vehicles.filter((v) => v.price <= maxVal);
       }
     }
 
-    const vehicles = await prisma.vehicle.findMany({ where });
     return res.status(200).json(vehicles);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -109,8 +124,22 @@ exports.updateVehicle = async (req, res) => {
     if (make !== undefined) data.make = make;
     if (model !== undefined) data.model = model;
     if (category !== undefined) data.category = category;
-    if (price !== undefined) data.price = parseFloat(price);
-    if (quantity !== undefined) data.quantity = parseInt(quantity);
+
+    if (price !== undefined) {
+      const prc = parseFloat(price);
+      if (isNaN(prc) || prc < 0) {
+        return res.status(400).json({ error: 'price must be a non-negative number' });
+      }
+      data.price = prc;
+    }
+
+    if (quantity !== undefined) {
+      const qty = parseInt(quantity);
+      if (isNaN(qty) || qty < 0) {
+        return res.status(400).json({ error: 'quantity must be a non-negative integer' });
+      }
+      data.quantity = qty;
+    }
 
     const updatedVehicle = await prisma.vehicle.update({
       where: { id },

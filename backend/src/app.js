@@ -2,17 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
-const inventoryRoutes = require('./routes/inventoryRoutes');
 
 const app = express();
 
-app.use(cors());
+// Apply CORS options to restrict access in production
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
-app.use('/api/vehicles', inventoryRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

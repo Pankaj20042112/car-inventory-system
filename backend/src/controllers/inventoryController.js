@@ -37,7 +37,8 @@ exports.restockVehicle = async (req, res) => {
     const { id } = req.params;
     const { quantity } = req.body;
 
-    if (quantity === undefined || parseInt(quantity) <= 0) {
+    const qty = parseInt(quantity);
+    if (quantity === undefined || isNaN(qty) || qty <= 0) {
       return res.status(400).json({ error: 'Restock quantity must be a positive integer' });
     }
 
@@ -54,7 +55,7 @@ exports.restockVehicle = async (req, res) => {
       where: { id },
       data: {
         quantity: {
-          increment: parseInt(quantity)
+          increment: qty
         }
       }
     });
