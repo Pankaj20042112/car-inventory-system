@@ -1,4 +1,3 @@
-const { Op } = require('sequelize');
 const Vehicle = require('../models/Vehicle');
 
 exports.createVehicle = async (req, res) => {
@@ -25,7 +24,7 @@ exports.createVehicle = async (req, res) => {
 
 exports.getVehicles = async (req, res) => {
   try {
-    const vehicles = await Vehicle.findAll();
+    const vehicles = await Vehicle.find();
     return res.status(200).json(vehicles);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -35,29 +34,29 @@ exports.getVehicles = async (req, res) => {
 exports.searchVehicles = async (req, res) => {
   try {
     const { make, model, category, minPrice, maxPrice } = req.query;
-    const where = {};
+    const query = {};
 
     if (make) {
-      where.make = { [Op.like]: `%${make}%` };
+      query.make = { $regex: make, $options: 'i' };
     }
     if (model) {
-      where.model = { [Op.like]: `%${model}%` };
+      query.model = { $regex: model, $options: 'i' };
     }
     if (category) {
-      where.category = { [Op.like]: `%${category}%` };
+      query.category = { $regex: category, $options: 'i' };
     }
 
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.price = {};
+    if (minPrice !== undefined && minPrice !== '' || maxPrice !== undefined && maxPrice !== '') {
+      query.price = {};
       if (minPrice !== undefined && minPrice !== '') {
-        where.price[Op.gte] = parseFloat(minPrice);
+        query.price.$gte = parseFloat(minPrice);
       }
       if (maxPrice !== undefined && maxPrice !== '') {
-        where.price[Op.lte] = parseFloat(maxPrice);
+        query.price.$lte = parseFloat(maxPrice);
       }
     }
 
-    const vehicles = await Vehicle.findAll({ where });
+    const vehicles = await Vehicle.find(query);
     return res.status(200).json(vehicles);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -69,7 +68,13 @@ exports.updateVehicle = async (req, res) => {
     const { id } = req.params;
     const { make, model, category, price, quantity } = req.body;
 
-    const vehicle = await Vehicle.findByPk(id);
+    // Check if ID is a valid MongoDB ObjectId (avoids casting errors)
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const vehicle = await Vehicle.findById(id);
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
@@ -92,12 +97,17 @@ exports.deleteVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const vehicle = await Vehicle.findByPk(id);
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const vehicle = await Vehicle.findById(id);
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
 
-    await vehicle.destroy();
+    await vehicle.deleteOne();
 
     return res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (error) {

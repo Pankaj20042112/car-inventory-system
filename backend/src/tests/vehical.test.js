@@ -1,6 +1,7 @@
 const request = require('supertest');
 const app = require('../app');
-const sequelize = require('../config/db');
+const connectDB = require('../config/db');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Vehicle = require('../models/Vehicle');
 
@@ -9,8 +10,11 @@ let adminToken;
 let testVehicleId;
 
 beforeAll(async () => {
-  // Sync database
-  await sequelize.sync({ force: true });
+  // Connect to database
+  await connectDB();
+
+  // Clear users first
+  await User.deleteMany({});
 
   // Create admin user and log in
   await request(app)
@@ -48,13 +52,13 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await sequelize.close();
+  await mongoose.connection.close();
 });
 
 describe('Vehicles and Inventory API', () => {
   beforeEach(async () => {
     // Clear vehicles and insert test vehicles
-    await Vehicle.destroy({ where: {}, truncate: true });
+    await Vehicle.deleteMany({});
 
     const car = await Vehicle.create({
       make: 'Toyota',
@@ -211,7 +215,7 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty('message');
 
-      const check = await Vehicle.findByPk(testVehicleId);
+      const check = await Vehicle.findById(testVehicleId);
       expect(check).toBeNull();
     });
 
@@ -233,13 +237,12 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.quantity).toEqual(4); // 5 -> 4
 
-      const check = await Vehicle.findByPk(testVehicleId);
+      const check = await Vehicle.findById(testVehicleId);
       expect(check.quantity).toEqual(4);
     });
 
     it('should fail purchase if vehicle is out of stock', async () => {
-      // Honda Civic is out of stock (quantity: 0)
-      const outOfStockCar = await Vehicle.findOne({ where: { make: 'Honda' } });
+      const outOfStockCar = await Vehicle.findOne({ make: 'Honda' });
 
       const res = await request(app)
         .post(`/api/vehicles/${outOfStockCar.id}/purchase`)
@@ -262,7 +265,7 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.quantity).toEqual(15); // 5 + 10
 
-      const check = await Vehicle.findByPk(testVehicleId);
+      const check = await Vehicle.findById(testVehicleId);
       expect(check.quantity).toEqual(15);
     });
 

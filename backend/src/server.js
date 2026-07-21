@@ -1,19 +1,18 @@
 require('dotenv').config();
 const app = require('./app');
-const sequelize = require('./config/db');
+const connectDB = require('./config/db');
 
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Sync database structures
-    await sequelize.sync();
-    console.log('Database connected and synchronized.');
+    // Establish connection to MongoDB database instance
+    await connectDB();
 
     // Seed default admin user if not present
     const User = require('./models/User');
     const bcrypt = require('bcryptjs');
-    const adminUser = await User.findOne({ where: { username: 'admin' } });
+    const adminUser = await User.findOne({ username: 'admin' });
     if (!adminUser) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
       await User.create({

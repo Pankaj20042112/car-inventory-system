@@ -1,22 +1,23 @@
 const request = require('supertest');
 const app = require('../app');
-const sequelize = require('../config/db');
+const connectDB = require('../config/db');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 beforeAll(async () => {
-  // Sync database (creates tables)
-  await sequelize.sync({ force: true });
+  // Connect to test MongoDB database
+  await connectDB();
 });
 
 afterAll(async () => {
-  // Close database connection
-  await sequelize.close();
+  // Close the database connection
+  await mongoose.connection.close();
 });
 
 describe('Authentication API', () => {
   beforeEach(async () => {
     // Clear users before each test
-    await User.destroy({ where: {}, truncate: true });
+    await User.deleteMany({});
   });
 
   describe('POST /api/auth/register', () => {
@@ -36,7 +37,7 @@ describe('Authentication API', () => {
       expect(res.body.user).not.toHaveProperty('password');
 
       // Verify db entry
-      const user = await User.findOne({ where: { username: 'john_doe' } });
+      const user = await User.findOne({ username: 'john_doe' });
       expect(user).toBeTruthy();
       expect(user.role).toEqual('user');
     });

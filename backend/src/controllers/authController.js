@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ where: { username } });
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ error: 'Username is already taken' });
     }
@@ -27,13 +27,9 @@ exports.register = async (req, res) => {
       role: role || 'user'
     });
 
-    // Return the user details (without password)
-    const userJson = newUser.toJSON();
-    delete userJson.password;
-
     return res.status(201).json({
       message: 'User registered successfully',
-      user: userJson
+      user: newUser.toJSON()
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -48,8 +44,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Find the user
-    const user = await User.findOne({ where: { username } });
+    // Find the user (need password field)
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
@@ -67,12 +63,9 @@ exports.login = async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    const userJson = user.toJSON();
-    delete userJson.password;
-
     return res.status(200).json({
       token,
-      user: userJson
+      user: user.toJSON()
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

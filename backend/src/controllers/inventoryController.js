@@ -1,10 +1,15 @@
 const Vehicle = require('../models/Vehicle');
+const mongoose = require('mongoose');
 
 exports.purchaseVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const vehicle = await Vehicle.findByPk(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const vehicle = await Vehicle.findById(id);
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
@@ -31,7 +36,11 @@ exports.restockVehicle = async (req, res) => {
       return res.status(400).json({ error: 'Restock quantity must be a positive integer' });
     }
 
-    const vehicle = await Vehicle.findByPk(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const vehicle = await Vehicle.findById(id);
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }

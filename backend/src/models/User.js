@@ -1,26 +1,34 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+const mongoose = require('mongoose');
 
-const User = sequelize.define('User', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
+const UserSchema = new mongoose.Schema({
   username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
   },
   password: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: String,
+    required: true
   },
   role: {
-    type: DataTypes.ENUM('admin', 'user'),
-    allowNull: false,
-    defaultValue: 'user'
+    type: String,
+    enum: ['admin', 'user'],
+    default: 'user'
+  }
+}, {
+  timestamps: true
+});
+
+// Map _id to id and exclude password when converting documents to JSON
+UserSchema.set('toJSON', {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id.toString();
+    delete ret._id;
+    delete ret.password;
   }
 });
 
-module.exports = User;
+module.exports = mongoose.model('User', UserSchema);

@@ -1,17 +1,21 @@
-const { Sequelize } = require('sequelize');
-const path = require('path');
+const mongoose = require('mongoose');
 
-const env = process.env.NODE_ENV || 'development';
-const dbName = env === 'test' ? 'database.test.sqlite' : 'database.sqlite';
-const storagePath = path.join(__dirname, '..', '..', dbName);
+const connectDB = async () => {
+  const env = process.env.NODE_ENV || 'development';
+  const uri = env === 'test'
+    ? (process.env.MONGODB_URI_TEST || 'mongodb://127.0.0.1:27017/car_dealership_test')
+    : (process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/car_dealership');
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: storagePath,
-  logging: false, // Set to console.log to see SQL queries
-  define: {
-    timestamps: true
+  try {
+    const conn = await mongoose.connect(uri);
+    if (env !== 'test') {
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+    }
+    return conn;
+  } catch (error) {
+    console.error(`MongoDB Connection Error: ${error.message}`);
+    process.exit(1);
   }
-});
+};
 
-module.exports = sequelize;
+module.exports = connectDB;
