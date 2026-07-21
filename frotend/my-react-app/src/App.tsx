@@ -55,10 +55,18 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="flex flex-col min-h-screen bg-[#080b11] text-gray-100 selection:bg-indigo-500/30 selection:text-white">
+        <div className="relative flex flex-col min-h-screen bg-[#060913] text-gray-100 selection:bg-indigo-500/30 selection:text-white overflow-hidden">
+          {/* Animated Colorful Background Layer */}
+          <div className="colorful-bg-wrapper">
+            <div className="colorful-orb-1" />
+            <div className="colorful-orb-2" />
+            <div className="colorful-orb-3" />
+            <div className="colorful-grid-overlay" />
+          </div>
+
           <Navbar />
           
-          <main className="flex-grow flex flex-col">
+          <main className="relative z-10 flex-grow flex flex-col">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />

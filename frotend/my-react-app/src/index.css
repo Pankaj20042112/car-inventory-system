@@ -6,15 +6,16 @@
 
 :root {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  background-color: #080b11;
+  background-color: #060913;
   color: #f3f4f6;
 }
 
 body {
   margin: 0;
-  background-color: #080b11;
+  background-color: #060913;
   color: #e2e8f0;
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -24,18 +25,89 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism styling helpers */
 .glass-panel {
-  background: rgba(21, 28, 44, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-panel-hover:hover {
-  background: rgba(21, 28, 44, 0.85);
-  border-color: rgba(168, 85, 247, 0.35);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
-  transform: translateY(-2px);
+  background: rgba(23, 32, 54, 0.88);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+  transform: translateY(-3px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dynamic Animated Colorful Background Layer */
+.colorful-bg-wrapper {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.colorful-orb-1 {
+  position: absolute;
+  top: -15%;
+  left: 15%;
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(168, 85, 247, 0.2) 45%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(90px);
+  animation: float-slow 18s ease-in-out infinite alternate;
+}
+
+.colorful-orb-2 {
+  position: absolute;
+  bottom: 5%;
+  right: 10%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.28) 0%, rgba(139, 92, 246, 0.22) 50%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(100px);
+  animation: float-slow-reverse 22s ease-in-out infinite alternate;
+}
+
+.colorful-orb-3 {
+  position: absolute;
+  top: 45%;
+  left: -12%;
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.28) 0%, rgba(16, 185, 129, 0.18) 50%, rgba(0, 0, 0, 0) 70%);
+  filter: blur(95px);
+  animation: float-diag 20s ease-in-out infinite alternate;
+}
+
+.colorful-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(168, 85, 247, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px, 64px 64px, 64px 64px;
+  opacity: 0.8;
+}
+
+@keyframes float-slow {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(70px, 50px) scale(1.12); }
+  100% { transform: translate(-50px, 90px) scale(0.92); }
+}
+
+@keyframes float-slow-reverse {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-80px, -60px) scale(1.15); }
+  100% { transform: translate(40px, -100px) scale(0.88); }
+}
+
+@keyframes float-diag {
+  0% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(90px, -70px) scale(1.1); }
+  100% { transform: translate(50px, 60px) scale(0.95); }
 }
 
 /* Custom Scrollbar */
@@ -44,7 +116,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080b11;
+  background: #060913;
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
