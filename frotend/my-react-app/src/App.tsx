@@ -79,7 +79,7 @@ function App() {
               <Route
                 path="/admin/add"
                 element={
-                  <PrivateRoute requireAdmin>
+                  <PrivateRoute>
                     <AddVehicle />
                   </PrivateRoute>
                 }

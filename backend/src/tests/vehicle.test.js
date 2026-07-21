@@ -108,7 +108,7 @@ describe('Vehicles and Inventory API', () => {
       expect(res.body.quantity).toEqual(10);
     });
 
-    it('should deny a regular user from adding a vehicle', async () => {
+    it('should allow a regular user to add a new vehicle', async () => {
       const res = await request(app)
         .post('/api/vehicles')
         .set('Authorization', `Bearer ${userToken}`)
@@ -120,8 +120,10 @@ describe('Vehicles and Inventory API', () => {
           quantity: 10
         });
 
-      expect(res.statusCode).toEqual(403);
-      expect(res.body).toHaveProperty('error');
+      expect(res.statusCode).toEqual(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.make).toEqual('Ford');
+      expect(res.body.quantity).toEqual(10);
     });
 
     it('should deny unauthenticated requests', async () => {

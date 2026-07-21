@@ -5,6 +5,7 @@ import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getVehicles, searchVehicles, purchaseVehicle, restockVehicle, deleteVehicle } from '../services/vehicalService';
 import { Loader2, Plus, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -51,6 +52,117 @@ const Dashboard = () => {
     }
   };
 
+  // PDF Receipt Generator
+  const generateReceiptPDF = (vehicle) => {
+    try {
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Header Banner Background
+      doc.setFillColor(15, 23, 42); // Slate 900
+      doc.rect(0, 0, 210, 40, 'F');
+
+      // Header Banner Text
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('ANTIGRAVITY LUXURY SHOWROOM', 15, 20);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(194, 205, 230);
+      doc.text('Premium Car Dealership & Inventory Receipt', 15, 28);
+
+      // Invoice Header
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text('TRANSACTION RECEIPT', 15, 55);
+
+      // Metadata block
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+
+      const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
+      const dateStr = new Date().toLocaleString();
+
+      doc.text(`Receipt Number: ${receiptNo}`, 15, 63);
+      doc.text(`Date of Purchase: ${dateStr}`, 15, 69);
+      doc.text(`Buyer Username: ${user?.username || 'Guest Customer'}`, 15, 75);
+
+      // Separator line
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(15, 82, 195, 82);
+
+      // Specs Section
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(99, 102, 241); // Indigo
+      doc.text('VEHICLE SPECIFICATIONS', 15, 90);
+
+      // Specs Table Box
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, 95, 180, 52, 'F');
+      doc.rect(15, 95, 180, 52, 'S');
+
+      // Spec Fields
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      doc.text('Manufacturer (Make):', 20, 103);
+      doc.text('Vehicle Model:', 20, 111);
+      doc.text('Vehicle Category:', 20, 119);
+      doc.text('Stock Reference ID:', 20, 127);
+      doc.text('Payment Status:', 20, 135);
+
+      // Spec Values
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(15, 23, 42);
+      doc.text(vehicle.make || 'N/A', 75, 103);
+      doc.text(vehicle.model || 'N/A', 75, 111);
+      doc.text(vehicle.category || 'N/A', 75, 119);
+      doc.text(vehicle.id || 'N/A', 75, 127);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(16, 185, 129); // Emerald 500
+      doc.text('PAID & SHIPPED', 75, 135);
+
+      // Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, 155, 195, 155);
+
+      // Totals
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text('Total Amount Paid:', 105, 168);
+
+      doc.setFontSize(16);
+      doc.setTextColor(99, 102, 241); // Indigo
+      const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(vehicle.price);
+      doc.text(formattedPrice, 150, 168);
+
+      // Footer
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(9);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Thank you for choosing Antigravity Showrooms! Have a safe and pleasant drive.', 15, 195);
+      doc.text('For customer support, please contact us at support@antigravitydealership.com', 15, 201);
+
+      // Download
+      const pdfName = `receipt_${vehicle.make.toLowerCase()}_${vehicle.model.toLowerCase()}.pdf`;
+      doc.save(pdfName);
+    } catch (e) {
+      console.error('Failed to generate PDF:', e);
+      showToast('Purchase succeeded, but failed to generate receipt PDF', 'error');
+    }
+  };
+
   // Purchase handler
   const handlePurchase = async (id) => {
     try {
@@ -60,6 +172,8 @@ const Dashboard = () => {
       setVehicles((prev) =>
         prev.map((v) => (v.id === id ? { ...v, quantity: updated.quantity } : v))
       );
+      // Trigger PDF Receipt Download
+      generateReceiptPDF(updated);
     } catch (err) {
       showToast(err.response?.data?.error || 'Purchase failed', 'error');
     }
@@ -128,7 +242,7 @@ const Dashboard = () => {
           <p className="text-gray-400 text-sm">Explore, search, and manage high-quality vehicles instantly.</p>
         </div>
 
-        {isAdmin && (
+        {user && (
           <button
             onClick={() => navigate('/admin/add')}
             className="flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-glow transition-all duration-200"
