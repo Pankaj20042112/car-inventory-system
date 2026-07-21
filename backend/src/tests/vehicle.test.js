@@ -303,4 +303,30 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(403);
     });
   });
+
+  describe('GET /api/vehicles/my-purchases and /all-purchases', () => {
+    it('should allow regular user to fetch their purchase history', async () => {
+      // First make a purchase
+      await request(app)
+        .post(`/api/vehicles/${testVehicleId}/purchase`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      const res = await request(app)
+        .get('/api/vehicles/my-purchases')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should allow admin to fetch all purchase transactions', async () => {
+      const res = await request(app)
+        .get('/api/vehicles/all-purchases')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+  });
 });

@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
-import { getVehicles, searchVehicles, purchaseVehicle, restockVehicle, deleteVehicle } from '../services/vehicalService';
-import { Loader2, Plus, Sparkles, CheckCircle2, AlertCircle, DollarSign, Package, Car, AlertTriangle, ShieldCheck, Tag, RefreshCw, Filter } from 'lucide-react';
+import { getVehicles, searchVehicles, purchaseVehicle, getMyPurchases } from '../services/vehicalService';
+import { Loader2, Sparkles, CheckCircle2, AlertCircle, ShoppingBag, Car, Tag, RefreshCw, Filter, FileText, Download, UserCheck } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 
 const Dashboard = () => {
@@ -12,11 +12,14 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [vehicles, setVehicles] = useState([]);
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('showroom'); // 'showroom' | 'my-purchases'
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('All');
   const [toast, setToast] = useState({ message: '', type: '' });
 
-  // Load vehicles
+  // Load showroom vehicles
   const loadVehicles = async () => {
     setLoading(true);
     try {
@@ -29,8 +32,22 @@ const Dashboard = () => {
     }
   };
 
+  // Load user purchase history
+  const loadMyPurchases = async () => {
+    setPurchasesLoading(true);
+    try {
+      const data = await getMyPurchases();
+      setPurchases(data);
+    } catch (err) {
+      showToast('Failed to load purchase history', 'error');
+    } finally {
+      setPurchasesLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadVehicles();
+    loadMyPurchases();
   }, []);
 
   const showToast = (message, type = 'success') => {
@@ -63,7 +80,7 @@ const Dashboard = () => {
       });
 
       // 1. Header Banner Background
-      doc.setFillColor(15, 23, 42); // Slate 900
+      doc.setFillColor(15, 23, 42);
       doc.rect(0, 0, 210, 45, 'F');
 
       // Header Banner Text
@@ -90,7 +107,7 @@ const Dashboard = () => {
       doc.text('Status: PAID', 145, 32);
 
       // Indigo Accent Line
-      doc.setFillColor(99, 102, 241); // Indigo 500
+      doc.setFillColor(99, 102, 241);
       doc.rect(0, 45, 210, 2, 'F');
 
       // 2. Seller and Buyer Information Columns
@@ -213,7 +230,7 @@ const Dashboard = () => {
       doc.save(pdfName);
     } catch (e) {
       console.error('Failed to generate PDF:', e);
-      showToast('Purchase succeeded, but failed to generate detailed PDF receipt', 'error');
+      showToast('Failed to generate PDF receipt', 'error');
     }
   };
 
@@ -221,62 +238,16 @@ const Dashboard = () => {
   const handlePurchase = async (id) => {
     try {
       const responseData = await purchaseVehicle(id);
-      showToast(`Vehicle purchased successfully!`);
+      showToast(`Vehicle purchased successfully! PDF receipt generated.`);
       setVehicles((prev) =>
         prev.map((v) => (v.id === id ? { ...v, quantity: responseData.vehicle.quantity } : v))
       );
       generateReceiptPDF(responseData.vehicle, responseData.purchase);
+      loadMyPurchases(); // refresh purchase history
     } catch (err) {
       showToast(err.response?.data?.error || 'Purchase failed', 'error');
     }
   };
-
-  // Restock handler
-  const handleRestock = async (vehicle) => {
-    const qtyStr = prompt(`Enter restock quantity for ${vehicle.make} ${vehicle.model}:`, '10');
-    if (qtyStr === null) return;
-    const qty = parseInt(qtyStr);
-
-    if (isNaN(qty) || qty <= 0) {
-      alert('Please enter a valid positive integer.');
-      return;
-    }
-
-    try {
-      const updated = await restockVehicle(vehicle.id, qty);
-      showToast(`Successfully restocked ${qty} units!`);
-      setVehicles((prev) =>
-        prev.map((v) => (v.id === vehicle.id ? { ...v, quantity: updated.quantity } : v))
-      );
-    } catch (err) {
-      showToast(err.response?.data?.error || 'Restock failed', 'error');
-    }
-  };
-
-  // Delete handler
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this vehicle from inventory?')) return;
-
-    try {
-      await deleteVehicle(id);
-      showToast('Vehicle deleted successfully');
-      setVehicles((prev) => prev.filter((v) => v.id !== id));
-    } catch (err) {
-      showToast('Deletion failed', 'error');
-    }
-  };
-
-  // Edit handler
-  const handleEdit = (vehicle) => {
-    navigate(`/admin/edit/${vehicle.id}`, { state: { vehicle } });
-  };
-
-  const isAdmin = user?.role === 'admin';
-
-  // Metrics calculation
-  const totalInventoryValue = vehicles.reduce((acc, v) => acc + (v.price || 0) * (v.quantity || 0), 0);
-  const totalStockUnits = vehicles.reduce((acc, v) => acc + (v.quantity || 0), 0);
-  const outOfStockCount = vehicles.filter((v) => v.quantity <= 0).length;
 
   // Filter vehicles by category pill
   const filteredVehicles = vehicles.filter((v) => {
@@ -286,7 +257,7 @@ const Dashboard = () => {
     return v.category.toLowerCase() === activeCategoryFilter.toLowerCase();
   });
 
-  const categoriesList = ['All', 'SUV', 'Sedan', 'Truck', 'In Stock', 'Out of Stock'];
+  const categoriesList = ['All', 'SUV', 'Sedan', 'Truck', 'In Stock'];
 
   return (
     <div className="flex-grow py-8 px-4 max-w-7xl mx-auto w-full space-y-8">
@@ -302,15 +273,15 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* User Welcome Hero Banner */}
+      {/* Customer Welcome Hero Banner */}
       <div className="glass-panel p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-950">
         <div className="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center space-x-3">
               <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5">
-                <ShieldCheck className="h-3.5 w-3.5" />
-                <span>{isAdmin ? 'Administrator Portal' : 'Showroom Hub'}</span>
+                <UserCheck className="h-3.5 w-3.5" />
+                <span>Customer Portal</span>
               </span>
               {user?.category && (
                 <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5">
@@ -321,161 +292,207 @@ const Dashboard = () => {
             </div>
 
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Welcome back, <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{user?.name || user?.username || 'Guest'}</span> 👋
+              Welcome, <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{user?.name || user?.username || 'Valued Customer'}</span> 👋
             </h1>
             <p className="text-sm text-gray-400 max-w-xl">
-              Monitor inventory stats, search vehicle models, and perform instant purchases with automatic PDF receipt generation.
+              Browse showroom vehicles, search luxury models, purchase cars, and view your purchase receipts anytime.
             </p>
           </div>
 
           <div className="flex items-center space-x-3">
             <button
-              onClick={loadVehicles}
+              onClick={() => {
+                loadVehicles();
+                loadMyPurchases();
+              }}
               className="flex items-center space-x-2 bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-gray-300 font-semibold px-4 py-3 rounded-xl text-sm transition-all duration-200"
               title="Reload catalog"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh</span>
+              <span>Refresh Catalog</span>
             </button>
+          </div>
+        </div>
+      </div>
 
-            {user && (
+      {/* Main Tabs: Showroom Catalog vs My Purchases */}
+      <div className="flex items-center space-x-3 border-b border-white/10 pb-4">
+        <button
+          onClick={() => setActiveTab('showroom')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+            activeTab === 'showroom'
+              ? 'bg-indigo-600 text-white shadow-glow border border-indigo-500'
+              : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border border-white/5'
+          }`}
+        >
+          <Car className="h-4 w-4" />
+          <span>Showroom Catalog ({vehicles.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('my-purchases')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+            activeTab === 'my-purchases'
+              ? 'bg-indigo-600 text-white shadow-glow border border-indigo-500'
+              : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border border-white/5'
+          }`}
+        >
+          <ShoppingBag className="h-4 w-4" />
+          <span>My Orders & Receipts ({purchases.length})</span>
+        </button>
+      </div>
+
+      {/* SHOWROOM TAB CONTENT */}
+      {activeTab === 'showroom' && (
+        <div className="space-y-8">
+          {/* Search Bar Component */}
+          <SearchBar onSearch={handleSearch} />
+
+          {/* Category Filter Quick-Pills */}
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-indigo-400" />
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quick Category Filter:</span>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {categoriesList.map((cat) => {
+                const isActive = activeCategoryFilter === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategoryFilter(cat)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
+                      isActive
+                        ? 'bg-indigo-600 text-white border-indigo-500 shadow-glow'
+                        : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border-white/5 hover:border-white/10'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Grid View */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-24 space-y-4">
+              <Loader2 className="h-12 w-12 text-indigo-500 animate-spin" />
+              <span className="text-gray-400 font-medium">Synchronizing showroom vehicles...</span>
+            </div>
+          ) : filteredVehicles.length === 0 ? (
+            <div className="glass-panel text-center py-20 px-4 rounded-3xl border border-white/5 shadow-md">
+              <Sparkles className="h-12 w-12 text-indigo-400/50 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No Vehicles Found</h3>
+              <p className="text-gray-400 text-sm max-w-sm mx-auto mb-6">
+                We couldn't find any vehicles matching your filter criteria. Try choosing a different category or resetting filters.
+              </p>
               <button
-                onClick={() => navigate('/admin/add')}
-                className="flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-glow transition-all duration-200"
+                onClick={() => {
+                  setActiveCategoryFilter('All');
+                  loadVehicles();
+                }}
+                className="bg-slate-900 border border-white/10 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-950 transition-all duration-200"
               >
-                <Plus className="h-4.5 w-4.5" />
-                <span>Add Vehicle</span>
+                Reset Filters
               </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Analytics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Fleet Valuation */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
-          <div className="p-3.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl">
-            <DollarSign className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Fleet Valuation</span>
-            <div className="text-2xl font-black text-white">
-              ${totalInventoryValue.toLocaleString()}
             </div>
-          </div>
-        </div>
-
-        {/* Catalog Models */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
-          <div className="p-3.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-2xl">
-            <Car className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Vehicle Models</span>
-            <div className="text-2xl font-black text-white">
-              {vehicles.length} Models
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredVehicles.map((vehicle) => (
+                <VehicleCard
+                  key={vehicle.id}
+                  vehicle={vehicle}
+                  onPurchase={handlePurchase}
+                  isAdmin={false} // Normal user view
+                />
+              ))}
             </div>
-          </div>
+          )}
         </div>
+      )}
 
-        {/* Total Stock Units */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
-          <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl">
-            <Package className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Units in Stock</span>
-            <div className="text-2xl font-black text-white">
-              {totalStockUnits} Units
+      {/* MY PURCHASES TAB CONTENT */}
+      {activeTab === 'my-purchases' && (
+        <div className="space-y-6">
+          {purchasesLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
+              <span className="text-gray-400 font-medium">Loading your purchase history...</span>
             </div>
-          </div>
-        </div>
-
-        {/* Stock Alerts */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/5 shadow-lg flex items-center space-x-4">
-          <div className={`p-3.5 rounded-2xl border ${
-            outOfStockCount > 0
-              ? 'bg-red-500/10 border-red-500/20 text-red-400'
-              : 'bg-slate-800 border-white/5 text-gray-400'
-          }`}>
-            <AlertTriangle className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stock Alerts</span>
-            <div className={`text-2xl font-black ${outOfStockCount > 0 ? 'text-red-400' : 'text-white'}`}>
-              {outOfStockCount} Out of Stock
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Bar Component */}
-      <SearchBar onSearch={handleSearch} />
-
-      {/* Category Filter Quick-Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-        <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-indigo-400" />
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Quick Category Filter:</span>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {categoriesList.map((cat) => {
-            const isActive = activeCategoryFilter === cat;
-            return (
+          ) : purchases.length === 0 ? (
+            <div className="glass-panel text-center py-20 px-4 rounded-3xl border border-white/5 shadow-md space-y-4">
+              <FileText className="h-12 w-12 text-indigo-400/40 mx-auto" />
+              <h3 className="text-xl font-bold text-white">No Purchase History Found</h3>
+              <p className="text-gray-400 text-sm max-w-sm mx-auto">
+                You haven't purchased any vehicles yet. Explore our Showroom Catalog to make your first purchase!
+              </p>
               <button
-                key={cat}
-                onClick={() => setActiveCategoryFilter(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border ${
-                  isActive
-                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-glow'
-                    : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border-white/5 hover:border-white/10'
-                }`}
+                onClick={() => setActiveTab('showroom')}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition-all duration-200 shadow-glow"
               >
-                {cat}
+                Browse Showroom
               </button>
-            );
-          })}
-        </div>
-      </div>
+            </div>
+          ) : (
+            <div className="glass-panel rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+              <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white">My Order Transactions</h3>
+                  <p className="text-xs text-gray-400">View details and download official PDF receipts for past purchases.</p>
+                </div>
+                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                  {purchases.length} Total Purchased
+                </span>
+              </div>
 
-      {/* Main Grid View */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-24 space-y-4">
-          <Loader2 className="h-12 w-12 text-indigo-500 animate-spin" />
-          <span className="text-gray-400 font-medium">Synchronizing live stock...</span>
-        </div>
-      ) : filteredVehicles.length === 0 ? (
-        <div className="glass-panel text-center py-20 px-4 rounded-3xl border border-white/5 shadow-md">
-          <Sparkles className="h-12 w-12 text-indigo-400/50 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">No Vehicles Found</h3>
-          <p className="text-gray-400 text-sm max-w-sm mx-auto mb-6">
-            We couldn't find any vehicles matching your filter criteria. Try choosing a different category or refreshing.
-          </p>
-          <button
-            onClick={() => {
-              setActiveCategoryFilter('All');
-              loadVehicles();
-            }}
-            className="bg-slate-900 border border-white/10 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-950 transition-all duration-200"
-          >
-            Reset Filters
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredVehicles.map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              onPurchase={handlePurchase}
-              onEdit={handleEdit}
-              onRestock={handleRestock}
-              onDelete={handleDelete}
-              isAdmin={isAdmin}
-            />
-          ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-900/80 border-b border-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6">Receipt No</th>
+                      <th className="py-4 px-6">Vehicle</th>
+                      <th className="py-4 px-6">Category</th>
+                      <th className="py-4 px-6">Amount Paid</th>
+                      <th className="py-4 px-6">Purchase Date</th>
+                      <th className="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+                    {purchases.map((p) => (
+                      <tr key={p.id} className="hover:bg-white/[0.02] transition-colors duration-150">
+                        <td className="py-4 px-6 font-mono text-indigo-400 font-bold text-xs">{p.receiptNo}</td>
+                        <td className="py-4 px-6 font-bold text-white">
+                          {p.make} {p.model}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="bg-slate-950 text-indigo-300 border border-white/10 px-2.5 py-1 rounded-md text-xs font-semibold">
+                            {p.category}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 font-bold text-emerald-400">
+                          ${p.price?.toLocaleString()}
+                        </td>
+                        <td className="py-4 px-6 text-xs text-gray-400">
+                          {new Date(p.createdAt).toLocaleString()}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => generateReceiptPDF({ make: p.make, model: p.model, category: p.category, price: p.price, id: p.vehicleId }, p)}
+                            className="flex items-center space-x-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ml-auto"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>Receipt PDF</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

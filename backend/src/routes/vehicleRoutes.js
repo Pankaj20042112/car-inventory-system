@@ -4,8 +4,10 @@ const vehicleController = require('../controllers/vehicleController');
 const inventoryController = require('../controllers/inventoryController');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
-// Note: /search MUST be registered before /:id to prevent route matching collisions
+// Note: /search, /my-purchases, /all-purchases MUST be registered before /:id to prevent route matching collisions
 router.get('/search', authenticateToken, vehicleController.searchVehicles);
+router.get('/my-purchases', authenticateToken, inventoryController.getMyPurchases);
+router.get('/all-purchases', authenticateToken, requireAdmin, inventoryController.getAllPurchases);
 router.get('/', authenticateToken, vehicleController.getVehicles);
 router.post('/', authenticateToken, vehicleController.createVehicle);
 router.put('/:id', authenticateToken, requireAdmin, vehicleController.updateVehicle);

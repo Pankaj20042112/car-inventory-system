@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getVehicles, restockVehicle, deleteVehicle } from '../services/vehicalService';
-import { Plus, Edit2, RotateCcw, Trash2, ShieldCheck, DollarSign, Database, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getVehicles, restockVehicle, deleteVehicle, getAllPurchases } from '../services/vehicalService';
+import { Plus, Edit2, RotateCcw, Trash2, ShieldCheck, DollarSign, Database, Loader2, AlertCircle, CheckCircle2, ShoppingBag, FileText, TrendingUp, AlertTriangle, RefreshCw, Car } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 const Admin = () => {
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [purchasesLoading, setPurchasesLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('inventory'); // 'inventory' | 'sales'
   const [toast, setToast] = useState({ message: '', type: '' });
 
   const loadInventory = async () => {
@@ -21,8 +25,21 @@ const Admin = () => {
     }
   };
 
+  const loadSalesHistory = async () => {
+    setPurchasesLoading(true);
+    try {
+      const data = await getAllPurchases();
+      setPurchases(data);
+    } catch (err) {
+      showToast('Failed to load customer sales report', 'error');
+    } finally {
+      setPurchasesLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadInventory();
+    loadSalesHistory();
   }, []);
 
   const showToast = (message, type = 'success') => {
@@ -67,8 +84,78 @@ const Admin = () => {
 
   // Stats calculation
   const totalVehiclesCount = vehicles.length;
-  const totalStockCount = vehicles.reduce((sum, v) => sum + v.quantity, 0);
-  const totalInventoryValue = vehicles.reduce((sum, v) => sum + v.price * v.quantity, 0);
+  const totalStockCount = vehicles.reduce((sum, v) => sum + (v.quantity || 0), 0);
+  const totalInventoryValue = vehicles.reduce((sum, v) => sum + (v.price || 0) * (v.quantity || 0), 0);
+  const totalRevenue = purchases.reduce((sum, p) => sum + (p.price || 0), 0);
+  const outOfStockCount = vehicles.filter((v) => v.quantity <= 0).length;
+
+  // PDF Receipt Re-generation for Admin
+  const generateReceiptPDF = (p) => {
+    try {
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, 210, 45, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text('VELOCITY SYSTEMS LUXURY DEALERSHIP', 15, 20);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(156, 163, 175);
+      doc.text('Premium Vehicles & Luxury Automobile Services', 15, 28);
+      doc.text('Authorized Agent System', 15, 34);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`RECEIPT: ${p.receiptNo}`, 145, 20);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Date: ${new Date(p.createdAt).toLocaleDateString()}`, 145, 26);
+      doc.text('Status: PAID', 145, 32);
+
+      doc.setFillColor(99, 102, 241);
+      doc.rect(0, 45, 210, 2, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text('SELLER / DEALER:', 15, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      doc.text('VeloCity Systems Dealership Group Ltd.', 15, 67);
+      doc.text('Email: sales@velocitysystemsdealership.com', 15, 73);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(15, 23, 42);
+      doc.text('BUYER / CUSTOMER:', 110, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(51, 65, 85);
+      doc.text(`Name: ${p.buyerName || 'N/A'}`, 110, 67);
+      doc.text(`Email: ${p.buyerEmail || 'N/A'}`, 110, 73);
+      doc.text(`Category: ${p.buyerCategory || 'Customer'}`, 110, 79);
+
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, 90, 195, 90);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(99, 102, 241);
+      doc.text('PURCHASED ITEM DESCRIPTION', 15, 100);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Vehicle: ${p.make} ${p.model} (${p.category})`, 15, 110);
+      doc.text(`Total Paid: $${p.price?.toLocaleString()}`, 15, 118);
+
+      doc.save(`receipt_${p.receiptNo}.pdf`);
+    } catch (e) {
+      showToast('PDF generation error', 'error');
+    }
+  };
 
   return (
     <div className="flex-grow py-12 px-4 max-w-7xl mx-auto w-full space-y-8">
@@ -91,138 +178,269 @@ const Admin = () => {
             <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-white">Admin Management Console</h1>
-            <p className="text-gray-400 text-sm">Control inventory limits, add showroom assets, and monitor performance.</p>
+            <h1 className="text-3xl font-extrabold text-white">Administrator Management Console</h1>
+            <p className="text-gray-400 text-sm">Control inventory limits, add showroom assets, and view customer sales reports.</p>
           </div>
         </div>
 
-        <button
-          onClick={() => navigate('/admin/add')}
-          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-glow transition-all duration-200"
-        >
-          <Plus className="h-4.5 w-4.5" />
-          <span>Add New Vehicle</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => {
+              loadInventory();
+              loadSalesHistory();
+            }}
+            className="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 border border-white/10 text-gray-300 font-semibold px-4 py-3 rounded-xl text-sm transition-all duration-200"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh Data</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/admin/add')}
+            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-glow transition-all duration-200"
+          >
+            <Plus className="h-4.5 w-4.5" />
+            <span>Add New Vehicle</span>
+          </button>
+        </div>
       </div>
 
       {/* Dashboard Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-        {/* Metric 1 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
+        {/* Metric 1: Inventory Assets Capital */}
         <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-center space-x-4">
-          <div className="bg-indigo-500/10 p-4 rounded-xl text-indigo-400">
-            <Database className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Showroom Models</div>
-            <div className="text-2xl font-black text-white">{totalVehiclesCount} Types</div>
-          </div>
-        </div>
-
-        {/* Metric 2 */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-center space-x-4">
-          <div className="bg-purple-500/10 p-4 rounded-xl text-purple-400">
-            <Database className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Stock Units</div>
-            <div className="text-2xl font-black text-white">{totalStockCount} units</div>
-          </div>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-center space-x-4">
-          <div className="bg-emerald-500/10 p-4 rounded-xl text-emerald-400">
+          <div className="bg-indigo-500/10 p-3.5 rounded-2xl border border-indigo-500/20 text-indigo-400">
             <DollarSign className="h-6 w-6" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Inventory Assets Capital</div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Fleet Valuation</div>
             <div className="text-2xl font-black text-white">${totalInventoryValue.toLocaleString()}</div>
+          </div>
+        </div>
+
+        {/* Metric 2: Total Sales Revenue */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-center space-x-4">
+          <div className="bg-emerald-500/10 p-3.5 rounded-2xl border border-emerald-500/20 text-emerald-400">
+            <TrendingUp className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gross Sales Revenue</div>
+            <div className="text-2xl font-black text-emerald-400">${totalRevenue.toLocaleString()}</div>
+          </div>
+        </div>
+
+        {/* Metric 3: Total Stock Units */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-center space-x-4">
+          <div className="bg-purple-500/10 p-3.5 rounded-2xl border border-purple-500/20 text-purple-400">
+            <Database className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total In-Stock Units</div>
+            <div className="text-2xl font-black text-white">{totalStockCount} Units</div>
+          </div>
+        </div>
+
+        {/* Metric 4: Stock Alerts */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/5 flex items-center space-x-4">
+          <div className={`p-3.5 rounded-2xl border ${
+            outOfStockCount > 0 ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-slate-800 border-white/5 text-gray-400'
+          }`}>
+            <AlertTriangle className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stock Warnings</div>
+            <div className={`text-2xl font-black ${outOfStockCount > 0 ? 'text-red-400' : 'text-white'}`}>
+              {outOfStockCount} Out of Stock
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Database Inventory Table */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-          <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
-          <span className="text-gray-400 font-medium">Fetching database contents...</span>
-        </div>
-      ) : vehicles.length === 0 ? (
-        <div className="glass-panel text-center py-16 px-4 rounded-2xl border border-white/5">
-          <AlertCircle className="h-10 w-10 text-gray-500 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-white mb-1">No Inventory Registered</h3>
-          <p className="text-sm text-gray-500">Your database is empty. Click the button above to add a vehicle.</p>
-        </div>
-      ) : (
-        <div className="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-900/80 border-b border-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                  <th className="py-4 px-6">ID</th>
-                  <th className="py-4 px-6">Vehicle Specification</th>
-                  <th className="py-4 px-6">Category</th>
-                  <th className="py-4 px-6">Unit Price</th>
-                  <th className="py-4 px-6">Stock Status</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5 text-sm text-gray-300">
-                {vehicles.map((v) => (
-                  <tr key={v.id} className="hover:bg-white/[0.02] transition-colors duration-150">
-                    <td className="py-4 px-6 font-mono text-gray-500 text-xs">{v.id}</td>
-                    <td className="py-4 px-6">
-                      <div className="font-bold text-white">{v.make}</div>
-                      <div className="text-xs text-gray-400">{v.model}</div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="bg-slate-950 text-indigo-300 border border-white/10 px-2.5 py-1 rounded-md text-xs font-semibold">
-                        {v.category}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 font-bold text-white">${v.price.toLocaleString()}</td>
-                    <td className="py-4 px-6">
-                      {v.quantity <= 0 ? (
-                        <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
-                          Out of Stock
-                        </span>
-                      ) : (
-                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md text-xs font-bold">
-                          {v.quantity} units
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => navigate(`/admin/edit/${v.id}`, { state: { vehicle: v } })}
-                          className="flex items-center space-x-1.5 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white border border-indigo-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
-                        >
-                          <Edit2 className="h-3 w-3" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() => handleRestock(v)}
-                          className="flex items-center space-x-1.5 bg-purple-500/10 hover:bg-purple-500 text-purple-400 hover:text-white border border-purple-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          <span>Restock</span>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(v.id)}
-                          className="flex items-center space-x-1.5 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      {/* View Tabs */}
+      <div className="flex items-center space-x-3 border-b border-white/10 pb-4">
+        <button
+          onClick={() => setActiveTab('inventory')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+            activeTab === 'inventory'
+              ? 'bg-indigo-600 text-white shadow-glow border border-indigo-500'
+              : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border border-white/5'
+          }`}
+        >
+          <Car className="h-4 w-4" />
+          <span>Showroom Inventory Management ({vehicles.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('sales')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+            activeTab === 'sales'
+              ? 'bg-indigo-600 text-white shadow-glow border border-indigo-500'
+              : 'bg-slate-900/80 hover:bg-slate-800 text-gray-400 border border-white/5'
+          }`}
+        >
+          <ShoppingBag className="h-4 w-4" />
+          <span>Customer Sales Reports ({purchases.length})</span>
+        </button>
+      </div>
+
+      {/* INVENTORY TAB */}
+      {activeTab === 'inventory' && (
+        <>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
+              <span className="text-gray-400 font-medium">Fetching database contents...</span>
+            </div>
+          ) : vehicles.length === 0 ? (
+            <div className="glass-panel text-center py-16 px-4 rounded-2xl border border-white/5">
+              <AlertCircle className="h-10 w-10 text-gray-500 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-1">No Inventory Registered</h3>
+              <p className="text-sm text-gray-500">Your database is empty. Click the button above to add a vehicle.</p>
+            </div>
+          ) : (
+            <div className="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-900/80 border-b border-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6">ID</th>
+                      <th className="py-4 px-6">Vehicle Specification</th>
+                      <th className="py-4 px-6">Category</th>
+                      <th className="py-4 px-6">Unit Price</th>
+                      <th className="py-4 px-6">Stock Status</th>
+                      <th className="py-4 px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+                    {vehicles.map((v) => (
+                      <tr key={v.id} className="hover:bg-white/[0.02] transition-colors duration-150">
+                        <td className="py-4 px-6 font-mono text-gray-500 text-xs">{v.id}</td>
+                        <td className="py-4 px-6">
+                          <div className="font-bold text-white">{v.make}</div>
+                          <div className="text-xs text-gray-400">{v.model}</div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="bg-slate-950 text-indigo-300 border border-white/10 px-2.5 py-1 rounded-md text-xs font-semibold">
+                            {v.category}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 font-bold text-white">${v.price.toLocaleString()}</td>
+                        <td className="py-4 px-6">
+                          {v.quantity <= 0 ? (
+                            <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
+                              Out of Stock
+                            </span>
+                          ) : (
+                            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md text-xs font-bold">
+                              {v.quantity} units
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => navigate(`/admin/edit/${v.id}`, { state: { vehicle: v } })}
+                              className="flex items-center space-x-1.5 bg-indigo-500/10 hover:bg-indigo-500 text-indigo-400 hover:text-white border border-indigo-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleRestock(v)}
+                              className="flex items-center space-x-1.5 bg-purple-500/10 hover:bg-purple-500 text-purple-400 hover:text-white border border-purple-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
+                            >
+                              <RotateCcw className="h-3 w-3" />
+                              <span>Restock</span>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(v.id)}
+                              className="flex items-center space-x-1.5 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* CUSTOMER SALES REPORT TAB */}
+      {activeTab === 'sales' && (
+        <>
+          {purchasesLoading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
+              <span className="text-gray-400 font-medium">Loading sales transaction reports...</span>
+            </div>
+          ) : purchases.length === 0 ? (
+            <div className="glass-panel text-center py-16 px-4 rounded-2xl border border-white/5">
+              <FileText className="h-10 w-10 text-gray-500 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-white mb-1">No Purchase Transactions Recorded</h3>
+              <p className="text-sm text-gray-500">Sales records will appear here as customers buy vehicles.</p>
+            </div>
+          ) : (
+            <div className="glass-panel rounded-2xl border border-white/5 overflow-hidden shadow-xl">
+              <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Customer Sales Ledger</h3>
+                  <p className="text-xs text-gray-400">Complete log of all vehicle purchases and generated receipts.</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-gray-400">Total Revenue: </span>
+                  <span className="text-base font-black text-emerald-400">${totalRevenue.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-900/80 border-b border-white/5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      <th className="py-4 px-6">Receipt No</th>
+                      <th className="py-4 px-6">Buyer Customer</th>
+                      <th className="py-4 px-6">Email / Category</th>
+                      <th className="py-4 px-6">Vehicle Item</th>
+                      <th className="py-4 px-6">Sale Amount</th>
+                      <th className="py-4 px-6">Date</th>
+                      <th className="py-4 px-6 text-right">Receipt</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-sm text-gray-300">
+                    {purchases.map((p) => (
+                      <tr key={p.id} className="hover:bg-white/[0.02] transition-colors duration-150">
+                        <td className="py-4 px-6 font-mono text-indigo-400 font-bold text-xs">{p.receiptNo}</td>
+                        <td className="py-4 px-6 font-bold text-white">{p.buyerName}</td>
+                        <td className="py-4 px-6 text-xs">
+                          <div className="text-gray-300">{p.buyerEmail}</div>
+                          <div className="text-indigo-400 font-semibold">{p.buyerCategory}</div>
+                        </td>
+                        <td className="py-4 px-6 font-bold text-white">
+                          {p.make} {p.model} ({p.category})
+                        </td>
+                        <td className="py-4 px-6 font-bold text-emerald-400">${p.price?.toLocaleString()}</td>
+                        <td className="py-4 px-6 text-xs text-gray-400">{new Date(p.createdAt).toLocaleString()}</td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => generateReceiptPDF(p)}
+                            className="bg-indigo-500/10 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/20 px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-150 ml-auto"
+                          >
+                            PDF
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

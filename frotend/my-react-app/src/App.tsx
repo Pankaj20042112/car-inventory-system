@@ -43,6 +43,14 @@ const PrivateRoute = ({ children, requireAdmin = false }: PrivateRouteProps) => 
   return children;
 };
 
+const DashboardRoute = () => {
+  const { user } = useContext(AuthContext) as any;
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+  return <Dashboard />;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -62,7 +70,7 @@ function App() {
                 path="/dashboard"
                 element={
                   <PrivateRoute>
-                    <Dashboard />
+                    <DashboardRoute />
                   </PrivateRoute>
                 }
               />

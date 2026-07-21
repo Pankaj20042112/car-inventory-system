@@ -26,21 +26,21 @@ const Navbar = () => {
       <div className="flex items-center space-x-6">
         {user ? (
           <>
-            <Link
-              to="/dashboard"
-              className="flex items-center space-x-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-lg transition-all duration-200"
-            >
-              <LayoutDashboard className="h-4 w-4" />
-              <span>Dashboard</span>
-            </Link>
-
-            {user.role === 'admin' && (
+            {user.role === 'admin' ? (
               <Link
                 to="/admin"
                 className="flex items-center space-x-2 text-indigo-300 hover:text-white hover:bg-indigo-500/10 px-3 py-2 rounded-lg border border-indigo-500/20 transition-all duration-200"
               >
                 <Shield className="h-4 w-4" />
-                <span>Admin Panel</span>
+                <span>Admin Console</span>
+              </Link>
+            ) : (
+              <Link
+                to="/dashboard"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-lg transition-all duration-200"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                <span>My Dashboard</span>
               </Link>
             )}
 
