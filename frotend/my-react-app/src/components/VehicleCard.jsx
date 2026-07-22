@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Edit2, RotateCcw, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Edit2, RotateCcw, Trash2, CheckCircle2, AlertTriangle, Database } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
 
 const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
@@ -77,14 +77,24 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
   const [imgError, setImgError] = React.useState(false);
   const showImage = vehicle.imageUrl && !imgError;
 
+  const getVehicleYear = (modelStr) => {
+    const match = modelStr.match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : '2024';
+  };
+
+  const cleanModelName = (modelStr) => {
+    return modelStr.replace(/\b(19|20)\d{2}\b/, '').trim();
+  };
+
+  const vehicleYear = getVehicleYear(vehicle.model);
+  const modelDisplayName = cleanModelName(vehicle.model);
+
   return (
-    <div className="glass-panel glass-panel-hover rounded-2xl overflow-hidden flex flex-col h-full border border-white/5 hover:border-indigo-500/20 shadow-xl transition-all duration-300">
+    <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl overflow-hidden flex flex-col h-full border border-white/5 shadow-2xl hover:border-blue-500/20 transition-all duration-300">
       {/* Vehicle Render (Image or SVG Fallback) */}
       <div 
         onClick={() => !isAdmin && navigate(`/vehicle/${vehicle.id}`)}
-        className={`h-36 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/20 relative flex items-center justify-center border-b border-white/5 overflow-hidden ${
-          !isAdmin ? 'cursor-pointer group' : ''
-        }`}
+        className="h-56 bg-slate-950 relative flex items-center justify-center overflow-hidden cursor-pointer group"
       >
         {showImage ? (
           <img
@@ -94,102 +104,120 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-20 h-20 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
+          <div className="w-24 h-24 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
             {renderCarSvg(vehicle.category)}
           </div>
         )}
-        
-        {/* Category Badge */}
-        <span className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[8px] uppercase font-black tracking-widest text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-lg">
-          {vehicle.category}
-        </span>
 
-        {/* Stock Badge */}
-        <span className={`absolute top-3 right-3 text-[8px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg backdrop-blur-md border ${
-          isOutOfStock
-            ? 'bg-red-500/10 text-red-400 border-red-500/20'
-            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-        }`}>
-          {isOutOfStock ? 'Sold Out' : `${vehicle.quantity} Available`}
-        </span>
+        {/* Bottom Dark Gradient Shadow Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent pointer-events-none" />
+        
+        {/* Category Badge & Year Badge overlay */}
+        <div className="absolute top-3.5 left-3.5 flex items-center space-x-2 pointer-events-none">
+          <span className="bg-slate-950/80 backdrop-blur-md text-[9px] uppercase font-black tracking-widest text-white px-2.5 py-1 rounded">
+            {vehicle.category}
+          </span>
+          <span className="bg-slate-950/80 backdrop-blur-md text-[9px] uppercase font-black tracking-widest text-white px-2.5 py-1 rounded">
+            {vehicleYear}
+          </span>
+        </div>
+
+        {/* Stock Status Badge overlay */}
+        <div className="absolute top-3.5 right-3.5 pointer-events-none">
+          {isOutOfStock ? (
+            <span className="bg-slate-950/80 backdrop-blur-md text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded text-red-500 border border-red-500/20">
+              Out of Stock
+            </span>
+          ) : vehicle.quantity <= 2 ? (
+            <span className="bg-[#eab308]/10 text-[#eab308] border border-[#eab308]/20 backdrop-blur-md text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded">
+              Low Stock ({vehicle.quantity})
+            </span>
+          ) : (
+            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 backdrop-blur-md text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded">
+              In Stock ({vehicle.quantity})
+            </span>
+          )}
+        </div>
+
+        {/* Overlaid Make & Model at bottom-left */}
+        <div className="absolute bottom-4 left-4 flex flex-col pointer-events-none">
+          <span className="text-[10px] text-cyan-400 font-extrabold uppercase tracking-widest leading-none">
+            {vehicle.make}
+          </span>
+          <h3 className="text-xl font-extrabold text-white tracking-tight mt-1 leading-none drop-shadow-md">
+            {modelDisplayName}
+          </h3>
+        </div>
       </div>
 
-      {/* Vehicle Specs */}
+      {/* Card Info Area */}
       <div className="p-4.5 flex-grow flex flex-col justify-between space-y-4">
-        <div>
-          <div 
-            onClick={() => !isAdmin && navigate(`/vehicle/${vehicle.id}`)}
-            className={!isAdmin ? 'cursor-pointer group/title' : ''}
-          >
-            <span className="text-[9px] text-indigo-400 font-extrabold uppercase tracking-widest">{vehicle.make}</span>
-            <h3 className="text-xl font-black text-white tracking-tight mt-0.5 mb-1 group-hover/title:text-indigo-400 transition-colors duration-200">{vehicle.model}</h3>
-          </div>
-          
-          <div className="flex items-baseline space-x-1">
-            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">MSRP Starting At</span>
-            <span className="text-xl font-black text-white bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+        <div className="space-y-3">
+          {/* Stock Unit Counter and Price row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1.5 text-slate-300 font-semibold text-xs">
+              <Database className="h-4 w-4 text-slate-400 flex-shrink-0" />
+              <span>Stock: <strong className="text-white">{vehicle.quantity} units</strong></span>
+            </div>
+            <span className="text-lg font-black text-cyan-400">
               ${vehicle.price.toLocaleString()}
             </span>
           </div>
+
+          {/* Description */}
+          <p className="text-xs text-slate-400 line-clamp-2 h-8 leading-relaxed">
+            {vehicle.description || "A premium high-performance vehicle designed for exceptional driving dynamics, style, and luxury comfort."}
+          </p>
         </div>
 
-        {/* Actions */}
+        {/* Action Button Panels */}
         <div className="space-y-2">
-          {/* Purchase / Add to Cart Button */}
-          {!isAdmin && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => navigate(`/vehicle/${vehicle.id}`)}
-                className="flex-1 bg-slate-950 hover:bg-slate-900 text-gray-300 hover:text-white font-semibold py-2 px-2 rounded-xl text-xs transition-all duration-300 border border-white/10 hover:border-indigo-500/30"
-              >
-                Specs Details
-              </button>
+          {/* Main Purchase Button */}
+          <button
+            onClick={() => addToCart(vehicle)}
+            disabled={isOutOfStock || isCartLimitReached}
+            className={`w-full flex items-center justify-center space-x-2 py-3 rounded-xl font-bold text-xs transition-all duration-300 ${
+              isOutOfStock
+                ? 'bg-slate-900 text-slate-600 border border-slate-800/50 cursor-not-allowed'
+                : isCartLimitReached
+                ? 'bg-slate-900 text-indigo-500 border border-indigo-500/20 cursor-not-allowed'
+                : 'bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-slate-950 font-black shadow-glow'
+            }`}
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            <span>
+              {isOutOfStock
+                ? 'Sold Out'
+                : isCartLimitReached
+                ? 'Max Limit Reached'
+                : qtyInCart > 0
+                ? `Purchase Vehicle (${qtyInCart} in Cart)`
+                : 'Purchase Vehicle'}
+            </span>
+          </button>
 
-              <button
-                onClick={() => addToCart(vehicle)}
-                disabled={isOutOfStock || isCartLimitReached}
-                className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-2 rounded-xl font-black text-xs transition-all duration-300 ${
-                  isOutOfStock
-                    ? 'bg-slate-900 text-slate-600 border border-slate-800/50 cursor-not-allowed'
-                    : isCartLimitReached
-                    ? 'bg-slate-900 text-indigo-500 border border-indigo-500/20 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:scale-[1.02] hover:shadow-glow text-white border border-indigo-500/30'
-                }`}
-              >
-                <ShoppingCart className="h-3 w-3" />
-                <span>
-                  {isOutOfStock
-                    ? 'Sold Out'
-                    : isCartLimitReached
-                    ? 'Max Limit'
-                    : qtyInCart > 0
-                    ? `Add (${qtyInCart})`
-                    : 'Add'}
-                </span>
-              </button>
-            </div>
-          )}
-
-          {/* Admin Tools Panel */}
+          {/* Admin Tools Row */}
           {isAdmin && (
-            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5">
-              <button
-                onClick={() => onEdit(vehicle)}
-                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/10 text-gray-400 hover:text-indigo-400 p-2 rounded-lg transition-all duration-200"
-                title="Edit Details"
-              >
-                <Edit2 className="h-3.5 w-3.5" />
-              </button>
+            <div className="flex gap-2 pt-2 border-t border-white/5">
               <button
                 onClick={() => onRestock(vehicle)}
-                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-gray-400 hover:text-purple-400 p-2 rounded-lg transition-all duration-200"
-                title="Restock Inventory"
+                className="flex-1 flex items-center justify-center space-x-1.5 bg-slate-950 border border-white/5 hover:bg-slate-900 text-gray-300 hover:text-white py-2 rounded-xl text-xs font-bold transition-all"
               >
-                <RotateCcw className="h-3.5 w-3.5" />
+                <RotateCcw className="h-3 w-3" />
+                <span>Restock</span>
               </button>
+
+              <button
+                onClick={() => onEdit(vehicle)}
+                className="flex-1 flex items-center justify-center space-x-1.5 bg-slate-950 border border-white/5 hover:bg-slate-900 text-gray-300 hover:text-white py-2 rounded-xl text-xs font-bold transition-all"
+              >
+                <Edit2 className="h-3 w-3" />
+                <span>Edit</span>
+              </button>
+
               <button
                 onClick={() => onDelete(vehicle.id)}
-                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 text-gray-400 hover:text-red-400 p-2 rounded-lg transition-all duration-200"
+                className="bg-slate-950 border border-white/5 hover:border-red-500/20 hover:text-red-400 text-gray-400 p-2 rounded-xl transition-all flex items-center justify-center"
                 title="Delete Vehicle"
               >
                 <Trash2 className="h-3.5 w-3.5" />
