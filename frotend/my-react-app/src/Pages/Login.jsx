@@ -98,13 +98,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Seed accounts notice */}
-          <div className="border-t border-white/5 pt-4 text-center">
-            <p className="text-xs text-gray-500">
-              Demo Credentials (Pre-seeded): <br />
-              <span className="font-mono text-gray-400">username: admin / password: admin123</span> (Admin Role)
-            </p>
-          </div>
+          {/* Form end */}
         </div>
       </div>
     </div>
