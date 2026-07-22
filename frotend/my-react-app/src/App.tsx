@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, AuthContext } from './context/Authcontext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Register from './Pages/Register';
 import Dashboard from './Pages/Dashboard';
@@ -51,6 +50,14 @@ const DashboardRoute = () => {
   return <Dashboard />;
 };
 
+const HomeRoute = () => {
+  const { user } = useContext(AuthContext) as any;
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Navigate to="/login" replace />;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -69,7 +76,7 @@ function App() {
           <main className="relative z-10 flex-grow flex flex-col">
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<HomeRoute />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
