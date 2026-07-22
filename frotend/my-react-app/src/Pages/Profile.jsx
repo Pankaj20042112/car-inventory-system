@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import { updateProfile, updatePassword } from '../services/authService';
 import { getMyPurchases, getAllPurchases, getVehicles } from '../services/vehicalService';
-import { User, Mail, Shield, UserCheck, KeyRound, AlertCircle, CheckCircle2, TrendingUp, DollarSign, Database, Loader2, Award, Calendar } from 'lucide-react';
+import { User, Mail, Shield, UserCheck, KeyRound, AlertCircle, CheckCircle2, TrendingUp, DollarSign, Database, Loader2, Award, Calendar, LogOut } from 'lucide-react';
 
 const Profile = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, logoutUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Profile Form State
   const [profileForm, setProfileForm] = useState({
@@ -417,6 +419,19 @@ const Profile = () => {
                 </div>
               </div>
             )}
+
+            <div className="pt-4 border-t border-white/10 mt-6">
+              <button
+                onClick={() => {
+                  logoutUser();
+                  navigate('/');
+                }}
+                className="w-full flex items-center justify-center space-x-2 bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/20 py-3.5 rounded-xl font-bold transition-all duration-200 shadow-glow"
+              >
+                <LogOut className="h-4.5 w-4.5" />
+                <span>Sign Out of Account</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
