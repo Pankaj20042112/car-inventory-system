@@ -73,7 +73,7 @@ const Dashboard = () => {
   };
 
   // PDF Receipt Generator
-  const generateReceiptPDF = (vehicle, purchase) => {
+  const generateReceiptPDF = (purchase) => {
     try {
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -88,14 +88,14 @@ const Dashboard = () => {
       // Header Banner Text
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(22);
+      doc.setFontSize(20);
       doc.text('VELOCITY SYSTEMS LUXURY DEALERSHIP', 15, 20);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setTextColor(156, 163, 175);
       doc.text('Premium Vehicles & Luxury Automobile Services', 15, 28);
-      doc.text('Authorized Agent System', 15, 34);
+      doc.text('Authorized Agent System', 15, 33);
 
       const receiptNo = purchase?.receiptNo || 'REC-' + Math.floor(100000 + Math.random() * 900000);
       const dateStr = purchase?.createdAt ? new Date(purchase.createdAt).toLocaleString() : new Date().toLocaleString();
@@ -114,77 +114,75 @@ const Dashboard = () => {
 
       // 2. Seller and Buyer Information Columns
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setTextColor(15, 23, 42);
       doc.text('SELLER / DEALER:', 15, 60);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setTextColor(51, 65, 85);
-      doc.text('VeloCity Systems Dealership Group Ltd.', 15, 67);
+      doc.text(purchase?.sellerName || 'VeloCity Systems Dealership Group Ltd.', 15, 67);
       doc.text('100 Innovation Way, Tech District', 15, 73);
       doc.text('Silicon Valley, CA 94025', 15, 79);
       doc.text('Email: sales@velocitysystemsdealership.com', 15, 85);
-      doc.text('Registry Lic: LIC-99381-AGY', 15, 91);
 
       // Buyer Info
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setTextColor(15, 23, 42);
       doc.text('BUYER / CUSTOMER:', 110, 60);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(9.5);
       doc.setTextColor(51, 65, 85);
       doc.text(`Name: ${purchase?.buyerName || user?.name || 'N/A'}`, 110, 67);
-      doc.text(`Username: ${user?.username || 'N/A'}`, 110, 73);
-      doc.text(`Email: ${purchase?.buyerEmail || user?.email || 'N/A'}`, 110, 79);
-      doc.text(`Category: ${purchase?.buyerCategory || user?.category || 'Customer'}`, 110, 85);
-      doc.text(`Account ID: ${purchase?.buyerId || user?.id || 'Guest'}`, 110, 91);
+      doc.text(`Email: ${purchase?.buyerEmail || user?.email || 'N/A'}`, 110, 73);
+      doc.text(`Category: ${purchase?.buyerCategory || user?.category || 'Customer'}`, 110, 79);
+      doc.text(`Account ID: ${purchase?.buyerId || user?.id || 'Guest'}`, 110, 85);
 
       // Horizontal Divider
       doc.setDrawColor(226, 232, 240);
       doc.setLineWidth(0.5);
-      doc.line(15, 100, 195, 100);
+      doc.line(15, 95, 195, 95);
 
       // 3. Purchase Details Section
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       doc.setTextColor(99, 102, 241);
-      doc.text('PURCHASED ITEM DESCRIPTION', 15, 110);
+      doc.text('PURCHASED ITEM DESCRIPTION', 15, 105);
 
       // Table Header Box
       doc.setFillColor(241, 245, 249);
-      doc.rect(15, 115, 180, 8, 'F');
-      doc.rect(15, 115, 180, 8, 'S');
+      doc.rect(15, 110, 180, 8, 'F');
+      doc.rect(15, 110, 180, 8, 'S');
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(71, 85, 105);
-      doc.text('ITEM SPECIFICATION', 20, 120.5);
-      doc.text('VALUE / DESCRIPTION', 85, 120.5);
+      doc.text('ITEM SPECIFICATION', 20, 115.5);
+      doc.text('VALUE / DESCRIPTION', 85, 115.5);
 
       // Table Content Grid Box
       doc.setDrawColor(203, 213, 225);
       doc.setFillColor(255, 255, 255);
-      doc.rect(15, 123, 180, 48, 'S');
+      doc.rect(15, 118, 180, 48, 'S');
 
       // Table rows mapping
       const rows = [
-        { label: 'Vehicle Manufacturer', val: vehicle.make || 'N/A' },
-        { label: 'Model Name', val: vehicle.model || 'N/A' },
-        { label: 'Body Category', val: vehicle.category || 'N/A' },
-        { label: 'Unique Identifier (ID)', val: vehicle.id || 'N/A' },
+        { label: 'Vehicle Manufacturer', val: purchase?.make || 'N/A' },
+        { label: 'Model Name', val: purchase?.model || 'N/A' },
+        { label: 'Body Category', val: purchase?.category || 'N/A' },
+        { label: 'Unique Identifier (ID)', val: purchase?.vehicleId || 'N/A' },
         { label: 'Transaction Timestamp', val: dateStr },
         { label: 'Payment Method', val: 'Digital Authorization / Token' }
       ];
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9.5);
+      doc.setFontSize(9);
       doc.setTextColor(15, 23, 42);
 
       rows.forEach((row, index) => {
-        const yPos = 129 + index * 7;
+        const yPos = 124 + index * 7;
         doc.setFont('helvetica', 'bold');
         doc.text(row.label, 20, yPos);
         doc.setFont('helvetica', 'normal');
@@ -196,39 +194,39 @@ const Dashboard = () => {
 
       // 4. Totals Block
       doc.setFillColor(248, 250, 252);
-      doc.rect(110, 178, 85, 18, 'F');
-      doc.rect(110, 178, 85, 18, 'S');
+      doc.rect(110, 172, 85, 18, 'F');
+      doc.rect(110, 172, 85, 18, 'S');
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(71, 85, 105);
-      doc.text('TOTAL AMOUNT:', 115, 189);
+      doc.text('TOTAL AMOUNT:', 115, 183);
 
       doc.setFontSize(14);
       doc.setTextColor(99, 102, 241);
-      const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(vehicle.price);
-      doc.text(formattedPrice, 150, 189);
+      const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchase?.price);
+      doc.text(formattedPrice, 150, 183);
 
       // Stamp / Signatures
       doc.setDrawColor(16, 185, 129);
       doc.setLineWidth(1);
-      doc.rect(20, 178, 45, 18, 'S');
+      doc.rect(20, 172, 45, 18, 'S');
       
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(16, 185, 129);
-      doc.text('AUTHORIZED', 26, 185);
-      doc.text('PAID STAMP', 28, 191);
+      doc.text('AUTHORIZED', 26, 179);
+      doc.text('PAID STAMP', 28, 185);
 
       // Footer
       doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8.5);
+      doc.setFontSize(8);
       doc.setTextColor(148, 163, 184);
-      doc.text('Terms: All vehicle sales include standard dealer warranties and manufacturer documentation.', 15, 230);
-      doc.text('For assistance, please email support@velocitysystemsdealership.com.', 15, 236);
+      doc.text('Terms: All vehicle sales include standard dealer warranties and manufacturer documentation.', 15, 215);
+      doc.text('For assistance, please email support@velocitysystemsdealership.com.', 15, 221);
 
       // Save PDF
-      const pdfName = `receipt_${vehicle.make.toLowerCase()}_${vehicle.model.toLowerCase()}.pdf`;
+      const pdfName = `receipt_${purchase?.make?.toLowerCase()}_${purchase?.model?.toLowerCase()}.pdf`;
       doc.save(pdfName);
     } catch (e) {
       console.error('Failed to generate PDF:', e);
