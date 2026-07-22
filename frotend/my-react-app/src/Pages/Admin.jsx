@@ -70,7 +70,6 @@ const Admin = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this vehicle from inventory?')) return;
 
     try {
       await deleteVehicle(id);
