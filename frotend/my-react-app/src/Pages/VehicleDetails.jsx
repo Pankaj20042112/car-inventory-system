@@ -110,7 +110,19 @@ const VehicleDetails = () => {
     };
   };
 
-  const specs = getPerformanceSpecs(vehicle.category, vehicle.make);
+  const getSpecs = () => {
+    const dynamic = getPerformanceSpecs(vehicle.category, vehicle.make);
+    return {
+      powertrain: vehicle.powertrain || dynamic.powertrain,
+      acceleration: vehicle.acceleration || dynamic.acceleration,
+      range: vehicle.range || dynamic.range,
+      topSpeed: vehicle.topSpeed || dynamic.topSpeed,
+      horsepower: vehicle.horsepower || dynamic.horsepower,
+      transmission: vehicle.transmission || dynamic.transmission
+    };
+  };
+
+  const specs = getSpecs();
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 flex-grow w-full">

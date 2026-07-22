@@ -2,7 +2,10 @@ const prisma = require('../config/db');
 
 exports.createVehicle = async (req, res) => {
   try {
-    const { make, model, category, price, quantity, imageUrl, description } = req.body;
+    const { 
+      make, model, category, price, quantity, imageUrl, description,
+      powertrain, acceleration, range, topSpeed, horsepower, transmission 
+    } = req.body;
 
     if (
       !make || !model || !category || price === undefined ||
@@ -35,7 +38,13 @@ exports.createVehicle = async (req, res) => {
         price: prc,
         quantity: qty,
         imageUrl: imageUrl ? imageUrl.trim() : null,
-        description: description ? description.trim() : null
+        description: description ? description.trim() : null,
+        powertrain: powertrain ? powertrain.trim() : null,
+        acceleration: acceleration ? acceleration.trim() : null,
+        range: range ? range.trim() : null,
+        topSpeed: topSpeed ? topSpeed.trim() : null,
+        horsepower: horsepower ? horsepower.trim() : null,
+        transmission: transmission ? transmission.trim() : null
       }
     });
 
@@ -96,7 +105,10 @@ exports.searchVehicles = async (req, res) => {
 exports.updateVehicle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { make, model, category, price, quantity, imageUrl, description } = req.body;
+    const { 
+      make, model, category, price, quantity, imageUrl, description,
+      powertrain, acceleration, range, topSpeed, horsepower, transmission 
+    } = req.body;
 
     // Check if ID is a valid MongoDB ObjectId length
     if (!id || id.length !== 24) {
@@ -132,6 +144,12 @@ exports.updateVehicle = async (req, res) => {
     if (description !== undefined) {
       data.description = description ? description.trim() : null;
     }
+    if (powertrain !== undefined) data.powertrain = powertrain ? powertrain.trim() : null;
+    if (acceleration !== undefined) data.acceleration = acceleration ? acceleration.trim() : null;
+    if (range !== undefined) data.range = range ? range.trim() : null;
+    if (topSpeed !== undefined) data.topSpeed = topSpeed ? topSpeed.trim() : null;
+    if (horsepower !== undefined) data.horsepower = horsepower ? horsepower.trim() : null;
+    if (transmission !== undefined) data.transmission = transmission ? transmission.trim() : null;
 
     if (price !== undefined) {
       const prc = parseFloat(price);

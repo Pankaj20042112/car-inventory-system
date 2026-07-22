@@ -23,6 +23,12 @@ const EditVehicle = () => {
     quantity: '',
     imageUrl: '',
     description: '',
+    powertrain: '',
+    acceleration: '',
+    range: '',
+    topSpeed: '',
+    horsepower: '',
+    transmission: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,6 +45,12 @@ const EditVehicle = () => {
         quantity: v.quantity.toString(),
         imageUrl: v.imageUrl || '',
         description: v.description || '',
+        powertrain: v.powertrain || '',
+        acceleration: v.acceleration || '',
+        range: v.range || '',
+        topSpeed: v.topSpeed || '',
+        horsepower: v.horsepower || '',
+        transmission: v.transmission || '',
       });
     } else {
       // Fallback: Fetch all and find the matching one
@@ -55,6 +67,12 @@ const EditVehicle = () => {
               quantity: found.quantity.toString(),
               imageUrl: found.imageUrl || '',
               description: found.description || '',
+              powertrain: found.powertrain || '',
+              acceleration: found.acceleration || '',
+              range: found.range || '',
+              topSpeed: found.topSpeed || '',
+              horsepower: found.horsepower || '',
+              transmission: found.transmission || '',
             });
           } else {
             setError('Vehicle not found in database.');
@@ -120,6 +138,12 @@ const EditVehicle = () => {
         quantity: qtyNum,
         imageUrl: form.imageUrl.trim() || null,
         description: form.description.trim() || null,
+        powertrain: form.powertrain.trim() || null,
+        acceleration: form.acceleration.trim() || null,
+        range: form.range.trim() || null,
+        topSpeed: form.topSpeed.trim() || null,
+        horsepower: form.horsepower.trim() || null,
+        transmission: form.transmission.trim() || null,
       });
       navigate('/admin');
     } catch (err) {
@@ -229,6 +253,93 @@ const EditVehicle = () => {
                 placeholder="0"
                 className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
               />
+            </div>
+          </div>
+
+          {/* Performance Parameters (Manual Overrides) */}
+          <div className="bg-slate-950/30 p-5 rounded-2xl border border-white/5 space-y-4">
+            <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-1.5">
+              <span>Performance Parameters (Overrides)</span>
+            </h4>
+            
+            <div className="grid grid-cols-2 gap-4">
+              {/* Powertrain */}
+              <div className="flex flex-col space-y-1">
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Engine / Motor</label>
+                <input
+                  type="text"
+                  name="powertrain"
+                  value={form.powertrain}
+                  onChange={handleChange}
+                  placeholder="e.g. 4.0L V8 Twin-Turbo"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                />
+              </div>
+
+              {/* Horsepower */}
+              <div className="flex flex-col space-y-1">
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Horsepower</label>
+                <input
+                  type="text"
+                  name="horsepower"
+                  value={form.horsepower}
+                  onChange={handleChange}
+                  placeholder="e.g. 657 hp"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                />
+              </div>
+
+              {/* Acceleration */}
+              <div className="flex flex-col space-y-1">
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Acceleration (0-60 mph)</label>
+                <input
+                  type="text"
+                  name="acceleration"
+                  value={form.acceleration}
+                  onChange={handleChange}
+                  placeholder="e.g. 3.1s"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                />
+              </div>
+
+              {/* Top Speed */}
+              <div className="flex flex-col space-y-1">
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Top Speed</label>
+                <input
+                  type="text"
+                  name="topSpeed"
+                  value={form.topSpeed}
+                  onChange={handleChange}
+                  placeholder="e.g. 190 mph"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                />
+              </div>
+
+              {/* Transmission */}
+              <div className="flex flex-col space-y-1">
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Transmission</label>
+                <input
+                  type="text"
+                  name="transmission"
+                  value={form.transmission}
+                  onChange={handleChange}
+                  placeholder="e.g. 8-Speed Automatic"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                />
+              </div>
+
+              {/* Fuel Economy / Range */}
+              <div className="flex flex-col space-y-1">
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Range / Fuel Economy</label>
+                <input
+                  type="text"
+                  name="range"
+                  value={form.range}
+                  onChange={handleChange}
+                  placeholder="e.g. 300 miles / 20 mpg"
+                  className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                />
+              </div>
             </div>
           </div>
 

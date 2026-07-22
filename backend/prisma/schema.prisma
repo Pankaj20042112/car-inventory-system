@@ -22,16 +22,22 @@ model User {
 }
 
 model Vehicle {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  make      String
-  model     String
-  category  String
-  price     Float
-  quantity  Int      @default(0)
-  imageUrl  String?
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  make        String
+  model       String
+  category    String
+  price       Float
+  quantity    Int      @default(0)
+  imageUrl    String?
   description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  powertrain   String?
+  acceleration String?
+  range        String?
+  topSpeed     String?
+  horsepower   String?
+  transmission String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("vehicles")
 }
