@@ -86,6 +86,8 @@ const Admin = () => {
   const totalInventoryValue = vehicles.reduce((sum, v) => sum + (v.price || 0) * (v.quantity || 0), 0);
   const totalRevenue = purchases.reduce((sum, p) => sum + (p.price || 0), 0);
   const outOfStockCount = vehicles.filter((v) => v.quantity <= 0).length;
+  const lowStockCount = vehicles.filter((v) => v.quantity > 0 && v.quantity <= 2).length;
+  const totalWarnings = outOfStockCount + lowStockCount;
 
   return (
     <div className="flex-grow py-12 px-4 max-w-7xl mx-auto w-full space-y-8">
@@ -173,14 +175,19 @@ const Admin = () => {
         {/* Metric 4: Stock Alerts */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10 flex items-center space-x-4">
           <div className={`p-3.5 rounded-2xl border ${
-            outOfStockCount > 0 ? 'bg-red-500/15 border-red-500/30 text-red-400' : 'bg-slate-800 border-white/10 text-gray-300'
+            totalWarnings > 0
+              ? (outOfStockCount > 0 ? 'bg-red-500/15 border-red-500/30 text-red-400' : 'bg-amber-500/15 border-amber-500/30 text-amber-400')
+              : 'bg-slate-800 border-white/10 text-gray-300'
           }`}>
             <AlertTriangle className="h-6 w-6" />
           </div>
           <div>
             <div className="text-xs font-bold text-gray-300 uppercase tracking-wider">Stock Warnings</div>
-            <div className={`text-2xl font-black ${outOfStockCount > 0 ? 'text-red-400' : 'text-white'}`}>
-              {outOfStockCount} Out of Stock
+            <div className={`text-2xl font-black ${totalWarnings > 0 ? (outOfStockCount > 0 ? 'text-red-400' : 'text-amber-400') : 'text-white'}`}>
+              {totalWarnings} Warnings
+            </div>
+            <div className="text-[10px] text-gray-400 mt-0.5">
+              {outOfStockCount} out of stock, {lowStockCount} low stock
             </div>
           </div>
         </div>
@@ -287,6 +294,10 @@ const Admin = () => {
                           {v.quantity <= 0 ? (
                             <span className="bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider">
                               Out of Stock
+                            </span>
+                          ) : v.quantity <= 2 ? (
+                            <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider">
+                              Low Stock ({v.quantity})
                             </span>
                           ) : (
                             <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-lg text-xs font-bold">
