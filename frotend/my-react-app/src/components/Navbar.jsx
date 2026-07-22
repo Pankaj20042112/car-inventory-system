@@ -19,7 +19,7 @@ const Navbar = () => {
     if (saved) {
       return saved;
     }
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {

@@ -170,14 +170,23 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body.light-mode .app-wrapper {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
 /* Light Mode Overrides */
 body.light-mode {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+:root.light-mode {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .colorful-bg-wrapper {
+  opacity: 0.15 !important;
 }
 
 body.light-mode h1,
