@@ -170,7 +170,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body.light-mode .app-wrapper {
-  background-color: #f8fafc !important;
+  background: linear-gradient(180deg, #0b0f19 0%, #111827 80px, #f1f5f9 240px, #f8fafc 100%) !important;
   color: #0f172a !important;
 }
 
@@ -186,7 +186,28 @@ body.light-mode {
 }
 
 body.light-mode .colorful-bg-wrapper {
-  opacity: 0.15 !important;
+  opacity: 0.25 !important;
+}
+
+/* Maintain dark navbar in mixed theme for ultimate high-contrast styling */
+body.light-mode nav.glass-panel {
+  background: rgba(11, 15, 25, 0.9) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.light-mode nav.glass-panel a,
+body.light-mode nav.glass-panel span,
+body.light-mode nav.glass-panel button {
+  color: #cbd5e1 !important;
+}
+
+body.light-mode nav.glass-panel a:hover,
+body.light-mode nav.glass-panel button:hover {
+  color: #ffffff !important;
+}
+
+body.light-mode nav.glass-panel .text-white {
+  color: #ffffff !important;
 }
 
 body.light-mode h1,
