@@ -1,3 +1,8 @@
+/**
+ * Vehicle Controller
+ * Handles vehicle inventory catalog records, manual performance parameter overrides,
+ * stocking operations, and individual details queries.
+ */
 const prisma = require('../config/db');
 
 exports.createVehicle = async (req, res) => {
