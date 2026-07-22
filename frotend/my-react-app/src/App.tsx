@@ -9,6 +9,7 @@ import Dashboard from './Pages/Dashboard';
 import Admin from './Pages/Admin';
 import AddVehicle from './Pages/AddVehicle';
 import EditVehicle from './Pages/EditVehicle';
+import Profile from './Pages/Profile';
 import { Loader2 } from 'lucide-react';
 import './App.css';
 
@@ -86,6 +87,14 @@ function App() {
                 element={
                   <PrivateRoute>
                     <DashboardRoute />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
                   </PrivateRoute>
                 }
               />

@@ -126,3 +126,82 @@ exports.getMe = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, category } = req.body;
+    const userId = req.user.id;
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const data = {};
+    if (name !== undefined) {
+      if (name.trim() === '') return res.status(400).json({ error: 'Name cannot be empty' });
+      data.name = name.trim();
+    }
+    if (email !== undefined) {
+      if (email.trim() === '') return res.status(400).json({ error: 'Email cannot be empty' });
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+      const otherUser = await prisma.user.findFirst({
+        where: { email, NOT: { id: userId } }
+      });
+      if (otherUser) {
+        return res.status(400).json({ error: 'Email is already registered by another account' });
+      }
+      data.email = email.trim();
+    }
+    if (category !== undefined) {
+      if (category.trim() === '') return res.status(400).json({ error: 'Category cannot be empty' });
+      data.category = category.trim();
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data
+    });
+
+    const userJson = { ...updatedUser };
+    delete userJson.password;
+
+    return res.status(200).json(userJson);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+
+    if (newPassword.trim().length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password does not match' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    return res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

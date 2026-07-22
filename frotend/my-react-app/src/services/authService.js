@@ -28,3 +28,14 @@ export const getProfile = async () => {
   const response = await API.get('/auth/me');
   return response.data;
 };
+
+export const updateProfile = async (profileData) => {
+  const response = await API.put('/auth/profile', profileData);
+  localStorage.setItem('user', JSON.stringify(response.data));
+  return response.data;
+};
+
+export const updatePassword = async (passwordData) => {
+  const response = await API.put('/auth/password', passwordData);
+  return response.data;
+};

@@ -157,4 +157,66 @@ describe('Authentication API', () => {
       expect(res.body).toHaveProperty('error');
     });
   });
+
+  describe('PUT /api/auth/profile and /password', () => {
+    let token;
+
+    beforeEach(async () => {
+      await request(app)
+        .post('/api/auth/register')
+        .send({
+          username: 'profile_test',
+          password: 'password123',
+          name: 'Original Name',
+          email: 'original@example.com',
+          category: 'Customer'
+        });
+
+      const login = await request(app)
+        .post('/api/auth/login')
+        .send({
+          username: 'profile_test',
+          password: 'password123'
+        });
+      token = login.body.token;
+    });
+
+    it('should update user profile details', async () => {
+      const res = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          name: 'Updated Name',
+          email: 'updated@example.com',
+          category: 'Gold'
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.name).toEqual('Updated Name');
+      expect(res.body.email).toEqual('updated@example.com');
+      expect(res.body.category).toEqual('Gold');
+    });
+
+    it('should update user password securely', async () => {
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          currentPassword: 'password123',
+          newPassword: 'newsecurepassword'
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.message).toEqual('Password updated successfully');
+
+      // Login with new password should succeed
+      const relogin = await request(app)
+        .post('/api/auth/login')
+        .send({
+          username: 'profile_test',
+          password: 'newsecurepassword'
+        });
+      expect(relogin.statusCode).toEqual(200);
+    });
+  });
 });

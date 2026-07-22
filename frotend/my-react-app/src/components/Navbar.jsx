@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
-import { Car, LogOut, Shield, LayoutDashboard, LogIn, UserPlus } from 'lucide-react';
+import { Car, LogOut, Shield, LayoutDashboard, LogIn, UserPlus, User } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logoutUser } = useContext(AuthContext);
@@ -18,9 +18,9 @@ const Navbar = () => {
         <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-glow">
           <Car className="h-6 w-6" />
         </div>
-        <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
+        <Link to="/" className="text-xl font-extrabold tracking-wider text-white">
           VeloCity Systems
-        </span>
+        </Link>
       </div>
 
       <div className="flex items-center space-x-6">
@@ -47,8 +47,15 @@ const Navbar = () => {
             <div className="h-4 w-[1px] bg-white/10" />
 
             <div className="flex items-center space-x-3">
+              <Link
+                to="/profile"
+                className="flex items-center space-x-2 text-indigo-300 hover:text-white hover:bg-indigo-500/10 px-3 py-2 rounded-lg border border-indigo-500/20 transition-all duration-200"
+                title="View Profile"
+              >
+                <User className="h-4 w-4" />
+                <span className="text-sm font-semibold">{user.username}</span>
+              </Link>
               <div className="flex flex-col text-right">
-                <span className="text-sm font-semibold text-white">{user.username}</span>
                 <span className="text-[10px] uppercase tracking-wider text-indigo-400 font-bold">
                   {user.role}
                 </span>
