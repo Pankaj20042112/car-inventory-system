@@ -7,7 +7,13 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     try {
       const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) : [];
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+      return [];
     } catch (e) {
       console.error(e);
       return [];
@@ -77,8 +83,8 @@ export const CartProvider = ({ children }) => {
     return data.purchases;
   };
 
-  const cartCount = cart.reduce((sum, item) => sum + item.cartQuantity, 0);
-  const cartTotal = cart.reduce((sum, item) => sum + item.cartQuantity * item.price, 0);
+  const cartCount = Array.isArray(cart) ? cart.reduce((sum, item) => sum + item.cartQuantity, 0) : 0;
+  const cartTotal = Array.isArray(cart) ? cart.reduce((sum, item) => sum + item.cartQuantity * item.price, 0) : 0;
 
   return (
     <CartContext.Provider
