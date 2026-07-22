@@ -32,14 +32,24 @@ exports.register = async (req, res) => {
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
-          { username },
-          { email }
+          {
+            username: {
+              equals: username.trim(),
+              mode: 'insensitive'
+            }
+          },
+          {
+            email: {
+              equals: email.trim(),
+              mode: 'insensitive'
+            }
+          }
         ]
       }
     });
 
     if (existingUser) {
-      if (existingUser.username.toLowerCase() === username.toLowerCase()) {
+      if (existingUser.username.toLowerCase() === username.trim().toLowerCase()) {
         return res.status(400).json({ error: 'Username is already taken' });
       }
       return res.status(400).json({ error: 'Email is already registered' });
@@ -51,12 +61,12 @@ exports.register = async (req, res) => {
     // Create the user
     const newUser = await prisma.user.create({
       data: {
-        username,
+        username: username.trim(),
         password: hashedPassword,
         role: role || 'user',
-        name,
-        email,
-        category
+        name: name.trim(),
+        email: email.trim(),
+        category: category.trim()
       }
     });
 
@@ -80,8 +90,16 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Find the user
-    const user = await prisma.user.findUnique({ where: { username } });
+    // Find the user case-insensitively and trimmed
+    const user = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username.trim(),
+          mode: 'insensitive'
+        }
+      }
+    });
+
     if (!user) {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
