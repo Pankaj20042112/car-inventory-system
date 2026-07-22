@@ -1,8 +1,8 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import { CartContext } from '../context/CartContext';
-import { Car, LogOut, Shield, LayoutDashboard, LogIn, UserPlus, User, ShoppingCart } from 'lucide-react';
+import { Car, LogOut, Shield, LayoutDashboard, LogIn, UserPlus, User, ShoppingCart, Sun, Moon } from 'lucide-react';
 import CartDrawer from './CartDrawer';
 import InteractiveReceiptModal from './InteractiveReceiptModal';
 import { generateReceiptPDF } from '../utils/pdfHelper';
@@ -14,6 +14,27 @@ const Navbar = () => {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutPurchases, setCheckoutPurchases] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      return saved;
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
+  };
 
   const handleLogout = () => {
     logoutUser();
@@ -33,6 +54,14 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-6">
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="text-gray-300 hover:text-white p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-indigo-500/30 transition-all duration-200"
+            title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5 text-indigo-400" />}
+          </button>
           {user ? (
             <>
               {user.role === 'admin' ? (
