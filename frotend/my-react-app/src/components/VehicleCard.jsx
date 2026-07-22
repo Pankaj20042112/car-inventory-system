@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Edit2, RotateCcw, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
-import VehicleDetailsModal from './VehicleDetailsModal';
 
 const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
+  const navigate = useNavigate();
   const { addToCart, cart } = useContext(CartContext);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const isOutOfStock = vehicle.quantity <= 0;
 
   const cartItem = cart.find((item) => item.id === vehicle.id);
@@ -45,7 +45,7 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
     <div className="glass-panel glass-panel-hover rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 shadow-lg transition-all duration-300">
       {/* Vehicle Render (Image or SVG Fallback) */}
       <div 
-        onClick={() => !isAdmin && setIsDetailsOpen(true)}
+        onClick={() => !isAdmin && navigate(`/vehicle/${vehicle.id}`)}
         className={`h-44 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 relative flex items-center justify-center border-b border-white/5 overflow-hidden ${
           !isAdmin ? 'cursor-pointer group' : ''
         }`}
@@ -82,7 +82,7 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
       <div className="p-6 flex-grow flex flex-col justify-between">
         <div>
           <div 
-            onClick={() => !isAdmin && setIsDetailsOpen(true)}
+            onClick={() => !isAdmin && navigate(`/vehicle/${vehicle.id}`)}
             className={!isAdmin ? 'cursor-pointer hover:text-indigo-400 transition-colors' : ''}
           >
             <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{vehicle.make}</span>
@@ -100,7 +100,7 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
           {!isAdmin && (
             <div className="flex gap-2">
               <button
-                onClick={() => setIsDetailsOpen(true)}
+                onClick={() => navigate(`/vehicle/${vehicle.id}`)}
                 className="flex-1 bg-slate-900 hover:bg-slate-800 text-gray-300 font-semibold py-3 rounded-xl text-sm transition-all duration-200 border border-white/10"
               >
                 Specs Details
@@ -159,16 +159,6 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
           )}
         </div>
       </div>
-
-      {/* Vehicle Specification Details Pop-up Modal */}
-      <VehicleDetailsModal
-        isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
-        vehicle={vehicle}
-        onAddToCart={addToCart}
-        qtyInCart={qtyInCart}
-        isCartLimitReached={isCartLimitReached}
-      />
     </div>
   );
 };

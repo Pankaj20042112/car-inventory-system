@@ -180,3 +180,22 @@ exports.deleteVehicle = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+exports.getVehicleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || id.length !== 24) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    return res.status(200).json(vehicle);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

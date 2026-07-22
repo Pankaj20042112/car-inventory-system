@@ -56,3 +56,8 @@ export const checkoutCart = async (vehicleIds) => {
   const response = await API.post('/vehicles/checkout', { vehicleIds });
   return response.data;
 };
+
+export const getVehicleById = async (id) => {
+  const response = await API.get(`/vehicles/${id}`);
+  return response.data;
+};

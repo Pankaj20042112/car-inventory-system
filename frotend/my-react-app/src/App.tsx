@@ -10,6 +10,7 @@ import Admin from './Pages/Admin';
 import AddVehicle from './Pages/AddVehicle';
 import EditVehicle from './Pages/EditVehicle';
 import Profile from './Pages/Profile';
+import VehicleDetails from './Pages/VehicleDetails';
 import { Loader2 } from 'lucide-react';
 import { CartProvider } from './context/CartContext';
 
@@ -96,6 +97,14 @@ function App() {
                   element={
                     <PrivateRoute>
                       <Profile />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/vehicle/:id"
+                  element={
+                    <PrivateRoute>
+                      <VehicleDetails />
                     </PrivateRoute>
                   }
                 />
