@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
+import InteractiveReceiptModal from '../components/InteractiveReceiptModal';
 import { getVehicles, searchVehicles, purchaseVehicle, getMyPurchases } from '../services/vehicalService';
 import { Loader2, Sparkles, CheckCircle2, AlertCircle, ShoppingBag, Car, Tag, RefreshCw, Filter, FileText, Download, UserCheck } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('showroom'); // 'showroom' | 'my-purchases'
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('All');
   const [toast, setToast] = useState({ message: '', type: '' });
+  const [selectedReceiptPurchase, setSelectedReceiptPurchase] = useState(null);
 
   // Load showroom vehicles
   const loadVehicles = async () => {
@@ -238,11 +240,11 @@ const Dashboard = () => {
   const handlePurchase = async (id) => {
     try {
       const responseData = await purchaseVehicle(id);
-      showToast(`Vehicle purchased successfully! PDF receipt generated.`);
+      showToast(`Vehicle purchased successfully!`);
       setVehicles((prev) =>
         prev.map((v) => (v.id === id ? { ...v, quantity: responseData.vehicle.quantity } : v))
       );
-      generateReceiptPDF(responseData.vehicle, responseData.purchase);
+      setSelectedReceiptPurchase(responseData.purchase);
       loadMyPurchases(); // refresh purchase history
     } catch (err) {
       showToast(err.response?.data?.error || 'Purchase failed', 'error');
@@ -479,11 +481,11 @@ const Dashboard = () => {
                         </td>
                         <td className="py-4 px-6 text-right">
                           <button
-                            onClick={() => generateReceiptPDF({ make: p.make, model: p.model, category: p.category, price: p.price, id: p.vehicleId }, p)}
-                            className="flex items-center space-x-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ml-auto"
+                            onClick={() => setSelectedReceiptPurchase(p)}
+                            className="flex items-center space-x-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/20 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ml-auto"
                           >
-                            <Download className="h-3.5 w-3.5" />
-                            <span>Receipt PDF</span>
+                            <FileText className="h-3.5 w-3.5" />
+                            <span>View Receipt</span>
                           </button>
                         </td>
                       </tr>
@@ -495,6 +497,24 @@ const Dashboard = () => {
           )}
         </div>
       )}
+
+      {/* Interactive Receipt Modal */}
+      <InteractiveReceiptModal
+        isOpen={!!selectedReceiptPurchase}
+        onClose={() => setSelectedReceiptPurchase(null)}
+        purchase={selectedReceiptPurchase}
+        onDownloadPDF={() => {
+          if (selectedReceiptPurchase) {
+            generateReceiptPDF({
+              make: selectedReceiptPurchase.make,
+              model: selectedReceiptPurchase.model,
+              category: selectedReceiptPurchase.category,
+              price: selectedReceiptPurchase.price,
+              id: selectedReceiptPurchase.vehicleId
+            }, selectedReceiptPurchase);
+          }
+        }}
+      />
     </div>
   );
 };

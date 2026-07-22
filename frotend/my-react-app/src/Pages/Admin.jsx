@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getVehicles, restockVehicle, deleteVehicle, getAllPurchases } from '../services/vehicalService';
 import { Plus, Edit2, RotateCcw, Trash2, ShieldCheck, DollarSign, Database, Loader2, AlertCircle, CheckCircle2, ShoppingBag, FileText, TrendingUp, AlertTriangle, RefreshCw, Car, Image } from 'lucide-react';
 import { jsPDF } from 'jspdf';
+import InteractiveReceiptModal from '../components/InteractiveReceiptModal';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Admin = () => {
   const [purchasesLoading, setPurchasesLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory'); // 'inventory' | 'sales'
   const [toast, setToast] = useState({ message: '', type: '' });
+  const [selectedReceiptPurchase, setSelectedReceiptPurchase] = useState(null);
 
   const loadInventory = async () => {
     setLoading(true);
@@ -457,10 +459,11 @@ const Admin = () => {
                         <td className="py-4 px-6 text-xs text-gray-300 font-medium">{new Date(p.createdAt).toLocaleString()}</td>
                         <td className="py-4 px-6 text-right">
                           <button
-                            onClick={() => generateReceiptPDF(p)}
-                            className="bg-indigo-500/20 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/30 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ml-auto"
+                            onClick={() => setSelectedReceiptPurchase(p)}
+                            className="flex items-center space-x-1.5 bg-indigo-500/20 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/30 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ml-auto"
                           >
-                            PDF
+                            <FileText className="h-3.5 w-3.5" />
+                            <span>View Receipt</span>
                           </button>
                         </td>
                       </tr>
@@ -472,6 +475,18 @@ const Admin = () => {
           )}
         </>
       )}
+
+      {/* Interactive Receipt Modal */}
+      <InteractiveReceiptModal
+        isOpen={!!selectedReceiptPurchase}
+        onClose={() => setSelectedReceiptPurchase(null)}
+        purchase={selectedReceiptPurchase}
+        onDownloadPDF={() => {
+          if (selectedReceiptPurchase) {
+            generateReceiptPDF(selectedReceiptPurchase);
+          }
+        }}
+      />
     </div>
   );
 };
