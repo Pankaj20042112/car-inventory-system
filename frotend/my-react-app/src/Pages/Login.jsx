@@ -1,16 +1,20 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import { LogIn, KeyRound, User, AlertCircle } from 'lucide-react';
 
 const Login = () => {
-  const { loginUser } = useContext(AuthContext);
+  const { loginUser, logoutUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    logoutUser();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

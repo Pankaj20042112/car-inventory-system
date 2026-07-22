@@ -1,10 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import { UserPlus, User, KeyRound, ShieldAlert, AlertCircle, CheckCircle2, Mail, Tag } from 'lucide-react';
 
 const Register = () => {
-  const { registerUser } = useContext(AuthContext);
+  const { registerUser, logoutUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [username, setUsername] = useState('');
@@ -13,6 +13,10 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [category, setCategory] = useState('Customer');
   const [role, setRole] = useState('user');
+
+  useEffect(() => {
+    logoutUser();
+  }, []);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
