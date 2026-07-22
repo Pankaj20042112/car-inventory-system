@@ -78,11 +78,11 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
   const showImage = vehicle.imageUrl && !imgError;
 
   return (
-    <div className="glass-panel glass-panel-hover rounded-3xl overflow-hidden flex flex-col h-full border border-white/10 hover:border-indigo-500/20 shadow-2xl transition-all duration-300">
+    <div className="glass-panel glass-panel-hover rounded-2xl overflow-hidden flex flex-col h-full border border-white/5 hover:border-indigo-500/20 shadow-xl transition-all duration-300">
       {/* Vehicle Render (Image or SVG Fallback) */}
       <div 
         onClick={() => !isAdmin && navigate(`/vehicle/${vehicle.id}`)}
-        className={`h-48 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/30 relative flex items-center justify-center border-b border-white/5 overflow-hidden ${
+        className={`h-36 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/20 relative flex items-center justify-center border-b border-white/5 overflow-hidden ${
           !isAdmin ? 'cursor-pointer group' : ''
         }`}
       >
@@ -94,18 +94,18 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-28 h-28 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
+          <div className="w-20 h-20 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
             {renderCarSvg(vehicle.category)}
           </div>
         )}
         
         {/* Category Badge */}
-        <span className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md text-[9px] uppercase font-black tracking-widest text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded-xl">
+        <span className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[8px] uppercase font-black tracking-widest text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-lg">
           {vehicle.category}
         </span>
 
         {/* Stock Badge */}
-        <span className={`absolute top-4 right-4 text-[9px] uppercase font-black tracking-widest px-3 py-1.5 rounded-xl backdrop-blur-md border ${
+        <span className={`absolute top-3 right-3 text-[8px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg backdrop-blur-md border ${
           isOutOfStock
             ? 'bg-red-500/10 text-red-400 border-red-500/20'
             : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -115,32 +115,32 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
       </div>
 
       {/* Vehicle Specs */}
-      <div className="p-6 flex-grow flex flex-col justify-between space-y-6">
+      <div className="p-4.5 flex-grow flex flex-col justify-between space-y-4">
         <div>
           <div 
             onClick={() => !isAdmin && navigate(`/vehicle/${vehicle.id}`)}
             className={!isAdmin ? 'cursor-pointer group/title' : ''}
           >
-            <span className="text-[10px] text-indigo-400 font-extrabold uppercase tracking-widest">{vehicle.make}</span>
-            <h3 className="text-2xl font-black text-white tracking-tight mt-1 mb-2 group-hover/title:text-indigo-400 transition-colors duration-200">{vehicle.model}</h3>
+            <span className="text-[9px] text-indigo-400 font-extrabold uppercase tracking-widest">{vehicle.make}</span>
+            <h3 className="text-xl font-black text-white tracking-tight mt-0.5 mb-1 group-hover/title:text-indigo-400 transition-colors duration-200">{vehicle.model}</h3>
           </div>
           
-          <div className="flex items-baseline space-x-1.5">
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">MSRP Starting At</span>
-            <span className="text-2xl font-black text-white bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+          <div className="flex items-baseline space-x-1">
+            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">MSRP Starting At</span>
+            <span className="text-xl font-black text-white bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
               ${vehicle.price.toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {/* Purchase / Add to Cart Button */}
           {!isAdmin && (
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => navigate(`/vehicle/${vehicle.id}`)}
-                className="flex-1 bg-slate-950 hover:bg-slate-900 text-gray-300 hover:text-white font-semibold py-3 rounded-2xl text-xs transition-all duration-300 border border-white/10 hover:border-indigo-500/30"
+                className="flex-1 bg-slate-950 hover:bg-slate-900 text-gray-300 hover:text-white font-semibold py-2 px-2 rounded-xl text-xs transition-all duration-300 border border-white/10 hover:border-indigo-500/30"
               >
                 Specs Details
               </button>
@@ -148,7 +148,7 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
               <button
                 onClick={() => addToCart(vehicle)}
                 disabled={isOutOfStock || isCartLimitReached}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-2xl font-black text-xs transition-all duration-300 ${
+                className={`flex-1 flex items-center justify-center space-x-1.5 py-2 px-2 rounded-xl font-black text-xs transition-all duration-300 ${
                   isOutOfStock
                     ? 'bg-slate-900 text-slate-600 border border-slate-800/50 cursor-not-allowed'
                     : isCartLimitReached
@@ -156,7 +156,7 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
                     : 'bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:scale-[1.02] hover:shadow-glow text-white border border-indigo-500/30'
                 }`}
               >
-                <ShoppingCart className="h-3.5 w-3.5" />
+                <ShoppingCart className="h-3 w-3" />
                 <span>
                   {isOutOfStock
                     ? 'Sold Out'
@@ -175,21 +175,21 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
             <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/5">
               <button
                 onClick={() => onEdit(vehicle)}
-                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/10 text-gray-400 hover:text-indigo-400 p-2.5 rounded-lg transition-all duration-200"
+                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/10 text-gray-400 hover:text-indigo-400 p-2 rounded-lg transition-all duration-200"
                 title="Edit Details"
               >
                 <Edit2 className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => onRestock(vehicle)}
-                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-gray-400 hover:text-purple-400 p-2.5 rounded-lg transition-all duration-200"
+                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 text-gray-400 hover:text-purple-400 p-2 rounded-lg transition-all duration-200"
                 title="Restock Inventory"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => onDelete(vehicle.id)}
-                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 text-gray-400 hover:text-red-400 p-2.5 rounded-lg transition-all duration-200"
+                className="flex items-center justify-center bg-slate-900 border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 text-gray-400 hover:text-red-400 p-2 rounded-lg transition-all duration-200"
                 title="Delete Vehicle"
               >
                 <Trash2 className="h-3.5 w-3.5" />
