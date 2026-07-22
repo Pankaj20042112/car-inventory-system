@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "npm run dev --prefix my-react-app",
+    "build": "npm run build --prefix my-react-app",
+    "preview": "npm run preview --prefix my-react-app"
   },
   "keywords": [],
   "author": "",
