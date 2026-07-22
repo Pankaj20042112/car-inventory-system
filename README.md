@@ -91,7 +91,7 @@ Ensure you have **Node.js** (v18+) and **MongoDB** installed and running on your
 
 ### 1. Administrator Management Console
 *Dynamic reporting showing Fleet Valuations, Gross Sales Revenue, and Stock Warnings.*
-![Admin Dashboard](screenshots\admin_panel.png.png)
+![Admin Dashboard](screenshots\admin_panel.png)
 
 ### 2. High-Fidelity Showroom Catalog
 *Clean card components displaying category tags, starting price configurations, and shopping options.*
