@@ -122,11 +122,23 @@ const Admin = () => {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(255, 255, 255);
-      doc.text(`RECEIPT: ${receiptNo}`, 145, 20);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Date: ${purchase?.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`, 145, 26);
-      doc.text('Status: PAID', 145, 32);
+      // doc.text(`RECEIPT: ${receiptNo}`, 147, 24);
+      // doc.setFont('helvetica', 'normal');
+      // doc.text(`Date: ${purchase?.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`, 147, 28);
+      // doc.text('Status: PAID', 147, 34);
+      const pageWidth = doc.internal.pageSize.getWidth();
 
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Receipt: ${receiptNo}`, pageWidth - 15, 18, { align: 'right' });
+
+      doc.setFont('helvetica', 'normal');
+      const dateVal = purchase?.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+      doc.text(`Date: ${dateVal}`, pageWidth - 15, 26, { align: 'right' });
+      doc.text('Status: PAID', pageWidth - 15, 34, { align: 'right' });
+
+
+      
       // Indigo Accent Line
       doc.setFillColor(99, 102, 241);
       doc.rect(0, 45, 210, 2, 'F');
@@ -193,7 +205,7 @@ const Admin = () => {
         { label: 'Body Category', val: purchase?.category || 'N/A' },
         { label: 'Unique Identifier (ID)', val: purchase?.vehicleId || 'N/A' },
         { label: 'Transaction Timestamp', val: dateStr },
-        { label: 'Payment Method', val: 'Digital Authorization / Token' }
+        { label: 'Payment Method', val: 'Digital Payment' }
       ];
 
       doc.setFont('helvetica', 'normal');
