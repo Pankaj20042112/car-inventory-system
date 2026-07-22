@@ -70,8 +70,8 @@ const VehicleDetails = () => {
     if (manufacturer.includes('tesla')) {
       return {
         powertrain: 'Tri-Motor AWD Electric',
-        acceleration: '1.99s (0-60 mph)',
-        range: '396 miles (Est.)',
+        acceleration: '1.99s',
+        range: '396 miles',
         topSpeed: '200 mph',
         horsepower: '1,020 hp',
         transmission: 'Single-speed Automatic'
@@ -81,7 +81,7 @@ const VehicleDetails = () => {
     if (cat.includes('suv')) {
       return {
         powertrain: '4.0L V8 Twin-Turbocharged',
-        acceleration: '3.1s (0-60 mph)',
+        acceleration: '3.1s',
         range: '14 mpg City / 19 mpg Hwy',
         topSpeed: '190 mph',
         horsepower: '657 hp',
@@ -92,7 +92,7 @@ const VehicleDetails = () => {
     if (cat.includes('truck')) {
       return {
         powertrain: '3.5L V6 Twin-Turbo Hybrid',
-        acceleration: '5.3s (0-60 mph)',
+        acceleration: '5.3s',
         range: '15 mpg City / 18 mpg Hwy',
         topSpeed: '120 mph',
         horsepower: '450 hp',
@@ -102,7 +102,7 @@ const VehicleDetails = () => {
 
     return {
       powertrain: '4.4L V8 TwinPower Turbo',
-      acceleration: '3.0s (0-60 mph)',
+      acceleration: '3.0s',
       range: '15 mpg City / 22 mpg Hwy',
       topSpeed: '190 mph',
       horsepower: '617 hp',
