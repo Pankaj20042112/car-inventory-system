@@ -14,6 +14,14 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: 'Username, password, name, email, and category are required' });
     }
 
+    if (username.trim().length < 3) {
+      return res.status(400).json({ error: 'Username must be at least 3 characters long' });
+    }
+
+    if (password.trim().length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {

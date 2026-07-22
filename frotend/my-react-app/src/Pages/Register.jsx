@@ -24,6 +24,23 @@ const Register = () => {
     setSuccess('');
     setLoading(true);
 
+    if (username.trim().length < 3) {
+      setError('Username must be at least 3 characters long');
+      setLoading(false);
+      return;
+    }
+    if (password.trim().length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     try {
       await registerUser(username, password, role, name, email, category);
       setSuccess('Account registered successfully! Redirecting to login...');

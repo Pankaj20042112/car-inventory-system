@@ -4,8 +4,11 @@ exports.createVehicle = async (req, res) => {
   try {
     const { make, model, category, price, quantity, imageUrl } = req.body;
 
-    if (!make || !model || !category || price === undefined) {
-      return res.status(400).json({ error: 'make, model, category, and price are required' });
+    if (
+      !make || !model || !category || price === undefined ||
+      make.trim() === '' || model.trim() === '' || category.trim() === ''
+    ) {
+      return res.status(400).json({ error: 'Make, model, category, and price are required and cannot be empty' });
     }
 
     const qty = quantity !== undefined ? parseInt(quantity) : 0;
@@ -13,10 +16,14 @@ exports.createVehicle = async (req, res) => {
 
     // Guard against NaN or negative values
     if (isNaN(qty) || qty < 0) {
-      return res.status(400).json({ error: 'quantity must be a non-negative integer' });
+      return res.status(400).json({ error: 'Quantity must be a non-negative integer' });
     }
-    if (isNaN(prc) || prc < 0) {
-      return res.status(400).json({ error: 'price must be a non-negative number' });
+    if (isNaN(prc) || prc <= 0) {
+      return res.status(400).json({ error: 'Price must be a positive number greater than 0' });
+    }
+
+    if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Image URL must be a valid HTTP/HTTPS link or a Base64 data URL' });
     }
 
     // Create a new vehicle entry in MongoDB
@@ -101,15 +108,31 @@ exports.updateVehicle = async (req, res) => {
     }
 
     const data = {};
-    if (make !== undefined) data.make = make;
-    if (model !== undefined) data.model = model;
-    if (category !== undefined) data.category = category;
-    if (imageUrl !== undefined) data.imageUrl = imageUrl;
+    if (make !== undefined) {
+      if (make.trim() === '') return res.status(400).json({ error: 'Make cannot be empty' });
+      data.make = make.trim();
+    }
+    if (model !== undefined) {
+      if (model.trim() === '') return res.status(400).json({ error: 'Model cannot be empty' });
+      data.model = model.trim();
+    }
+    if (category !== undefined) {
+      if (category.trim() === '') return res.status(400).json({ error: 'Category cannot be empty' });
+      data.category = category.trim();
+    }
+    if (imageUrl !== undefined) {
+      if (imageUrl !== null && imageUrl.trim() !== '') {
+        if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && !imageUrl.startsWith('data:image/')) {
+          return res.status(400).json({ error: 'Image URL must be a valid HTTP/HTTPS link or a Base64 data URL' });
+        }
+      }
+      data.imageUrl = imageUrl ? imageUrl.trim() : null;
+    }
 
     if (price !== undefined) {
       const prc = parseFloat(price);
-      if (isNaN(prc) || prc < 0) {
-        return res.status(400).json({ error: 'price must be a non-negative number' });
+      if (isNaN(prc) || prc <= 0) {
+        return res.status(400).json({ error: 'Price must be a positive number greater than 0' });
       }
       data.price = prc;
     }
@@ -117,7 +140,7 @@ exports.updateVehicle = async (req, res) => {
     if (quantity !== undefined) {
       const qty = parseInt(quantity);
       if (isNaN(qty) || qty < 0) {
-        return res.status(400).json({ error: 'quantity must be a non-negative integer' });
+        return res.status(400).json({ error: 'Quantity must be a non-negative integer' });
       }
       data.quantity = qty;
     }
