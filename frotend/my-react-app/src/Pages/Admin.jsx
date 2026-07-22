@@ -118,7 +118,7 @@ const Admin = () => {
           <button
             onClick={() => {
               loadInventory();
-              loadSalesHistory();
+              loadPurchases();
             }}
             className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-white/10 text-gray-200 font-semibold px-4 py-3 rounded-xl text-sm transition-all duration-200"
           >
