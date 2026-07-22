@@ -73,7 +73,7 @@ function App() {
 
           <Navbar />
           
-          <main className="relative z-10 flex-grow flex flex-col">
+          <main className="relative z-10 flex-grow flex flex-col pt-24">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<HomeRoute />} />

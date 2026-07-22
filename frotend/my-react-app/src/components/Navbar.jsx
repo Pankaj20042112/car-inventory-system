@@ -13,7 +13,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="glass-panel sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 shadow-md">
+    <nav className="glass-panel fixed top-0 left-0 right-0 w-full z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 shadow-md">
       <div className="flex items-center space-x-3">
         <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-glow">
           <Car className="h-6 w-6" />
