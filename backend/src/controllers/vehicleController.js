@@ -2,7 +2,7 @@ const prisma = require('../config/db');
 
 exports.createVehicle = async (req, res) => {
   try {
-    const { make, model, category, price, quantity, imageUrl } = req.body;
+    const { make, model, category, price, quantity, imageUrl, description } = req.body;
 
     if (
       !make || !model || !category || price === undefined ||
@@ -34,7 +34,8 @@ exports.createVehicle = async (req, res) => {
         category: category.trim(),
         price: prc,
         quantity: qty,
-        imageUrl: imageUrl ? imageUrl.trim() : null
+        imageUrl: imageUrl ? imageUrl.trim() : null,
+        description: description ? description.trim() : null
       }
     });
 
@@ -95,7 +96,7 @@ exports.searchVehicles = async (req, res) => {
 exports.updateVehicle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { make, model, category, price, quantity, imageUrl } = req.body;
+    const { make, model, category, price, quantity, imageUrl, description } = req.body;
 
     // Check if ID is a valid MongoDB ObjectId length
     if (!id || id.length !== 24) {
@@ -127,6 +128,9 @@ exports.updateVehicle = async (req, res) => {
         }
       }
       data.imageUrl = imageUrl ? imageUrl.trim() : null;
+    }
+    if (description !== undefined) {
+      data.description = description ? description.trim() : null;
     }
 
     if (price !== undefined) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, CheckCircle, Info, ShieldCheck, Zap, Gauge, Heart, ShoppingCart } from 'lucide-react';
 
-const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onAddToCart, qtyInCart, isCartLimitReached }) => {
+const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onAddToCart, qtyInCart, isCartLimitReached, isAdmin }) => {
   if (!isOpen || !vehicle) return null;
 
   // Generate dynamic premium specs based on vehicle category/make
@@ -108,6 +108,19 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onAddToCart, qtyInCart,
             </div>
           </div>
 
+          {/* Custom Description/Specs */}
+          {vehicle.description && (
+            <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 space-y-2">
+              <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-1.5">
+                <Info className="h-4 w-4" />
+                <span>Overview & Features</span>
+              </h4>
+              <p className="text-sm text-slate-200 mt-1 leading-relaxed whitespace-pre-wrap">
+                {vehicle.description}
+              </p>
+            </div>
+          )}
+
           {/* Performance Grid */}
           <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 space-y-4">
             <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-1.5">
@@ -159,7 +172,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onAddToCart, qtyInCart,
         {/* Modal Controls */}
         <div className="p-6 bg-slate-900/90 border-t border-white/10 flex items-center justify-between">
           <div className="text-xs text-slate-400">
-            {qtyInCart > 0 && <span>Currently in cart: <strong className="text-indigo-400">{qtyInCart} units</strong></span>}
+            {!isAdmin && qtyInCart > 0 && <span>Currently in cart: <strong className="text-indigo-400">{qtyInCart} units</strong></span>}
           </div>
 
           <div className="flex items-center space-x-3">
@@ -170,30 +183,32 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle, onAddToCart, qtyInCart,
               Close Details
             </button>
 
-            <button
-              onClick={() => {
-                onAddToCart(vehicle);
-              }}
-              disabled={isOutOfStock || isCartLimitReached}
-              className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-glow transition-all duration-150 ${
-                isOutOfStock
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  : isCartLimitReached
-                  ? 'bg-slate-800 text-indigo-400 border border-indigo-500/20 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white'
-              }`}
-            >
-              <ShoppingCart className="h-4 w-4" />
-              <span>
-                {isOutOfStock
-                  ? 'Unavailable'
-                  : isCartLimitReached
-                  ? 'Max Stock Added'
-                  : qtyInCart > 0
-                  ? `Add More (${qtyInCart})`
-                  : 'Add to Cart'}
-              </span>
-            </button>
+            {!isAdmin && (
+              <button
+                onClick={() => {
+                  onAddToCart(vehicle);
+                }}
+                disabled={isOutOfStock || isCartLimitReached}
+                className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-glow transition-all duration-150 ${
+                  isOutOfStock
+                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                    : isCartLimitReached
+                    ? 'bg-slate-800 text-indigo-400 border border-indigo-500/20 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white'
+                }`}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span>
+                  {isOutOfStock
+                    ? 'Unavailable'
+                    : isCartLimitReached
+                    ? 'Max Stock Added'
+                    : qtyInCart > 0
+                    ? `Add More (${qtyInCart})`
+                    : 'Add to Cart'}
+                </span>
+              </button>
+            )}
           </div>
         </div>
 

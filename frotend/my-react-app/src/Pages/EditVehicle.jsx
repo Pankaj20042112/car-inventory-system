@@ -22,6 +22,7 @@ const EditVehicle = () => {
     price: '',
     quantity: '',
     imageUrl: '',
+    description: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,6 +38,7 @@ const EditVehicle = () => {
         price: v.price.toString(),
         quantity: v.quantity.toString(),
         imageUrl: v.imageUrl || '',
+        description: v.description || '',
       });
     } else {
       // Fallback: Fetch all and find the matching one
@@ -52,6 +54,7 @@ const EditVehicle = () => {
               price: found.price.toString(),
               quantity: found.quantity.toString(),
               imageUrl: found.imageUrl || '',
+              description: found.description || '',
             });
           } else {
             setError('Vehicle not found in database.');
@@ -116,6 +119,7 @@ const EditVehicle = () => {
         price: priceNum,
         quantity: qtyNum,
         imageUrl: form.imageUrl.trim() || null,
+        description: form.description.trim() || null,
       });
       navigate('/admin');
     } catch (err) {
@@ -226,6 +230,19 @@ const EditVehicle = () => {
                 className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200"
               />
             </div>
+          </div>
+
+          {/* Description */}
+          <div className="flex flex-col space-y-1">
+            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Custom Description / Specifications</label>
+            <textarea
+              name="description"
+              rows="3"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="Enter unique performance specs, interior trims, premium features..."
+              className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all duration-200 resize-none"
+            />
           </div>
 
           {/* Vehicle Photo Upload & Presets */}
