@@ -113,3 +113,91 @@ exports.getAllPurchases = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+exports.checkoutCart = async (req, res) => {
+  try {
+    const { vehicleIds } = req.body;
+
+    if (!vehicleIds || !Array.isArray(vehicleIds) || vehicleIds.length === 0) {
+      return res.status(400).json({ error: 'No vehicles provided for checkout' });
+    }
+
+    // Count occurrences of each vehicle ID to handle duplicate purchase items in the cart
+    const idCounts = {};
+    vehicleIds.forEach((id) => {
+      idCounts[id] = (idCounts[id] || 0) + 1;
+    });
+
+    const uniqueIds = Object.keys(idCounts);
+
+    // Retrieve unique vehicles
+    const vehicles = await prisma.vehicle.findMany({
+      where: {
+        id: { in: uniqueIds }
+      }
+    });
+
+    if (vehicles.length !== uniqueIds.length) {
+      return res.status(404).json({ error: 'One or more vehicles not found' });
+    }
+
+    // Enforce stock validations
+    for (const vehicle of vehicles) {
+      const requiredQty = idCounts[vehicle.id];
+      if (vehicle.quantity < requiredQty) {
+        return res.status(400).json({ error: `Vehicle ${vehicle.make} ${vehicle.model} is out of stock or has insufficient quantity` });
+      }
+    }
+
+    const buyer = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!buyer) {
+      return res.status(404).json({ error: 'Buyer user not found' });
+    }
+
+    const receiptNo = 'REC-' + Math.floor(100000 + Math.random() * 900000);
+
+    const transactionResults = await prisma.$transaction(async (tx) => {
+      // Decrement quantities
+      for (const uniqueId of uniqueIds) {
+        const requiredQty = idCounts[uniqueId];
+        await tx.vehicle.update({
+          where: { id: uniqueId },
+          data: {
+            quantity: {
+              decrement: requiredQty
+            }
+          }
+        });
+      }
+
+      // Create purchase records
+      const purchases = [];
+      for (const vehicleId of vehicleIds) {
+        const vehicle = vehicles.find((v) => v.id === vehicleId);
+        const purchase = await tx.purchase.create({
+          data: {
+            receiptNo,
+            buyerId: buyer.id,
+            buyerName: buyer.name || buyer.username,
+            buyerEmail: buyer.email || 'N/A',
+            buyerCategory: buyer.category || 'Customer',
+            vehicleId: vehicle.id,
+            make: vehicle.make,
+            model: vehicle.model,
+            category: vehicle.category,
+            price: vehicle.price
+          }
+        });
+        purchases.push(purchase);
+      }
+
+      return purchases;
+    });
+
+    return res.status(200).json({
+      purchases: transactionResults
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

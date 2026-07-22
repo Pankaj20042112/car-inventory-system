@@ -8,6 +8,7 @@ const { authenticateToken, requireAdmin } = require('../middleware/auth');
 router.get('/search', authenticateToken, vehicleController.searchVehicles);
 router.get('/my-purchases', authenticateToken, inventoryController.getMyPurchases);
 router.get('/all-purchases', authenticateToken, requireAdmin, inventoryController.getAllPurchases);
+router.post('/checkout', authenticateToken, inventoryController.checkoutCart);
 router.get('/', authenticateToken, vehicleController.getVehicles);
 router.post('/', authenticateToken, vehicleController.createVehicle);
 router.put('/:id', authenticateToken, requireAdmin, vehicleController.updateVehicle);

@@ -4,8 +4,13 @@ import { X, Printer, Download, CheckCircle, Car, Shield, User, FileText } from '
 const InteractiveReceiptModal = ({ isOpen, onClose, purchase, onDownloadPDF }) => {
   if (!isOpen || !purchase) return null;
 
-  const dateStr = new Date(purchase.createdAt).toLocaleString();
-  const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchase.price);
+  const isMultiItem = Array.isArray(purchase);
+  const mainPurchase = isMultiItem ? purchase[0] : purchase;
+  const items = isMultiItem ? purchase : [purchase];
+
+  const dateStr = new Date(mainPurchase.createdAt).toLocaleString();
+  const grandTotal = items.reduce((sum, item) => sum + item.price, 0);
+  const formattedPrice = (price) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
 
   const handlePrint = () => {
     window.print();
@@ -23,7 +28,7 @@ const InteractiveReceiptModal = ({ isOpen, onClose, purchase, onDownloadPDF }) =
             </div>
             <div>
               <h3 className="font-extrabold text-lg text-white">Interactive Purchase Receipt</h3>
-              <p className="text-xs text-slate-400">Order Ref: {purchase.receiptNo}</p>
+              <p className="text-xs text-slate-400">Order Ref: {mainPurchase.receiptNo}</p>
             </div>
           </div>
           <button
@@ -50,7 +55,7 @@ const InteractiveReceiptModal = ({ isOpen, onClose, purchase, onDownloadPDF }) =
             {/* Seller */}
             <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 space-y-2 print:border-slate-200">
               <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Authorized Dealer</div>
-              <div className="font-black text-white print:text-black">{purchase.sellerName || 'VeloCity Systems'}</div>
+              <div className="font-black text-white print:text-black">{mainPurchase.sellerName || 'VeloCity Systems'}</div>
               <div className="text-xs text-slate-400">Email: sales@velocitysystemsdealership.com</div>
               <div className="text-xs text-slate-400">Warranty: Standard 3-Year Factory Warranty</div>
             </div>
@@ -58,39 +63,41 @@ const InteractiveReceiptModal = ({ isOpen, onClose, purchase, onDownloadPDF }) =
             {/* Buyer */}
             <div className="bg-slate-950/40 p-5 rounded-2xl border border-white/5 space-y-2 print:border-slate-200">
               <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Buyer Customer Details</div>
-              <div className="font-black text-white print:text-black">{purchase.buyerName}</div>
-              <div className="text-xs text-slate-400">Email: {purchase.buyerEmail}</div>
-              <div className="text-xs text-slate-400">Category Tier: <span className="font-bold text-purple-300">{purchase.buyerCategory}</span></div>
+              <div className="font-black text-white print:text-black">{mainPurchase.buyerName}</div>
+              <div className="text-xs text-slate-400">Email: {mainPurchase.buyerEmail}</div>
+              <div className="text-xs text-slate-400">Category Tier: <span className="font-bold text-purple-300">{mainPurchase.buyerCategory}</span></div>
             </div>
           </div>
 
           {/* Purchased Item Specification Card */}
-          <div className="bg-slate-950/40 border border-white/5 rounded-2xl overflow-hidden print:border-slate-200">
+          <div className="bg-slate-950/40 border border-white/5 rounded-2xl overflow-hidden print:border-slate-200 divide-y divide-white/5">
             <div className="px-5 py-3.5 bg-slate-900/50 border-b border-white/10 font-bold text-xs uppercase tracking-wider text-slate-400">
               Purchased Automobile Specification
             </div>
-            <div className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 flex items-center justify-center">
-                  <Car className="h-6 w-6" />
+            {items.map((item, idx) => (
+              <div key={item.id || idx} className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 flex items-center justify-center">
+                    <Car className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-extrabold text-white print:text-black">{item.make} {item.model}</h4>
+                    <p className="text-xs text-slate-400">Category: {item.category}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-base font-extrabold text-white print:text-black">{purchase.make} {purchase.model}</h4>
-                  <p className="text-xs text-slate-400">Category: {purchase.category}</p>
+                <div className="text-right">
+                  <div className="text-xs text-slate-400">Unit Price</div>
+                  <div className="text-lg font-black text-white print:text-black">{formattedPrice(item.price)}</div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-xs text-slate-400">Unit Price</div>
-                <div className="text-lg font-black text-white print:text-black">{formattedPrice}</div>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Pricing Totals Card */}
           <div className="flex flex-col items-end space-y-2 pt-4 border-t border-white/10 print:border-slate-200">
             <div className="flex justify-between w-64 text-sm text-slate-400">
               <span>Subtotal:</span>
-              <span className="font-semibold text-white print:text-black">{formattedPrice}</span>
+              <span className="font-semibold text-white print:text-black">{formattedPrice(grandTotal)}</span>
             </div>
             <div className="flex justify-between w-64 text-sm text-slate-400">
               <span>Dealer Fees & Luxury Tax:</span>
@@ -98,7 +105,7 @@ const InteractiveReceiptModal = ({ isOpen, onClose, purchase, onDownloadPDF }) =
             </div>
             <div className="flex justify-between w-64 text-base font-bold border-t border-white/10 pt-2 print:border-slate-200">
               <span className="text-slate-300">Grand Total Paid:</span>
-              <span className="text-xl font-black text-emerald-400">{formattedPrice}</span>
+              <span className="text-xl font-black text-emerald-400">{formattedPrice(grandTotal)}</span>
             </div>
           </div>
 

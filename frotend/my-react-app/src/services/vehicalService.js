@@ -51,3 +51,8 @@ export const getAllPurchases = async () => {
   const response = await API.get('/vehicles/all-purchases');
   return response.data;
 };
+
+export const checkoutCart = async (vehicleIds) => {
+  const response = await API.post('/vehicles/checkout', { vehicleIds });
+  return response.data;
+};

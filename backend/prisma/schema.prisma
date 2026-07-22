@@ -37,7 +37,7 @@ model Vehicle {
 
 model Purchase {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  receiptNo     String   @unique
+  receiptNo     String
   buyerId       String   @db.ObjectId
   buyerName     String
   buyerEmail    String

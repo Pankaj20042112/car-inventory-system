@@ -330,4 +330,58 @@ describe('Vehicles and Inventory API', () => {
       expect(Array.isArray(res.body)).toBe(true);
     });
   });
+
+  describe('POST /api/vehicles/checkout', () => {
+    it('should purchase multiple vehicles and decrease their quantities successfully', async () => {
+      const tesla = await prisma.vehicle.findFirst({ where: { make: 'Tesla' } });
+      const toyota = await prisma.vehicle.findFirst({ where: { make: 'Toyota' } });
+
+      const res = await request(app)
+        .post('/api/vehicles/checkout')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          vehicleIds: [tesla.id, toyota.id]
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty('purchases');
+      expect(res.body.purchases.length).toEqual(2);
+      expect(res.body.purchases[0].receiptNo).toEqual(res.body.purchases[1].receiptNo);
+
+      const checkTesla = await prisma.vehicle.findUnique({ where: { id: tesla.id } });
+      const checkToyota = await prisma.vehicle.findUnique({ where: { id: toyota.id } });
+      expect(checkTesla.quantity).toEqual(2); // 3 -> 2
+      expect(checkToyota.quantity).toEqual(4); // 5 -> 4
+    });
+
+    it('should fail checkout if any vehicle is out of stock', async () => {
+      const tesla = await prisma.vehicle.findFirst({ where: { make: 'Tesla' } });
+      const honda = await prisma.vehicle.findFirst({ where: { make: 'Honda' } }); // 0 quantity
+
+      const res = await request(app)
+        .post('/api/vehicles/checkout')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          vehicleIds: [tesla.id, honda.id]
+        });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty('error');
+
+      // Verify no quantity decreased (rollback/unchanged)
+      const checkTesla = await prisma.vehicle.findUnique({ where: { id: tesla.id } });
+      expect(checkTesla.quantity).toEqual(3);
+    });
+
+    it('should fail checkout if no vehicleIds are provided', async () => {
+      const res = await request(app)
+        .post('/api/vehicles/checkout')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          vehicleIds: []
+        });
+
+      expect(res.statusCode).toEqual(400);
+    });
+  });
 });

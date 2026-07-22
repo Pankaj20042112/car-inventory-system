@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ShoppingCart, Edit2, RotateCcw, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { CartContext } from '../context/CartContext';
 
-const VehicleCard = ({ vehicle, onPurchase, onEdit, onRestock, onDelete, isAdmin }) => {
+const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
+  const { addToCart, cart } = useContext(CartContext);
   const isOutOfStock = vehicle.quantity <= 0;
+
+  const cartItem = cart.find((item) => item.id === vehicle.id);
+  const qtyInCart = cartItem ? cartItem.cartQuantity : 0;
+  const isCartLimitReached = qtyInCart >= vehicle.quantity;
 
   // Render a clean SVG based on category
   const renderCarSvg = (category) => {
@@ -78,19 +84,31 @@ const VehicleCard = ({ vehicle, onPurchase, onEdit, onRestock, onDelete, isAdmin
 
         {/* Actions */}
         <div className="space-y-3">
-          {/* Purchase Button */}
-          <button
-            onClick={() => onPurchase(vehicle.id)}
-            disabled={isOutOfStock}
-            className={`w-full flex items-center justify-center space-x-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
-              isOutOfStock
-                ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-glow border border-indigo-500/30'
-            }`}
-          >
-            <ShoppingCart className="h-4 w-4" />
-            <span>{isOutOfStock ? 'Unavailable' : 'Purchase Vehicle'}</span>
-          </button>
+          {/* Purchase / Add to Cart Button */}
+          {!isAdmin && (
+            <button
+              onClick={() => addToCart(vehicle)}
+              disabled={isOutOfStock || isCartLimitReached}
+              className={`w-full flex items-center justify-center space-x-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
+                isOutOfStock
+                  ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                  : isCartLimitReached
+                  ? 'bg-slate-800 text-indigo-400 border border-indigo-500/20 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-glow border border-indigo-500/30'
+              }`}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              <span>
+                {isOutOfStock
+                  ? 'Unavailable'
+                  : isCartLimitReached
+                  ? 'Max Stock Added'
+                  : qtyInCart > 0
+                  ? `Add More (${qtyInCart})`
+                  : 'Add to Cart'}
+              </span>
+            </button>
+          )}
 
           {/* Admin Tools Panel */}
           {isAdmin && (

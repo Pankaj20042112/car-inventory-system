@@ -11,7 +11,7 @@ import AddVehicle from './Pages/AddVehicle';
 import EditVehicle from './Pages/EditVehicle';
 import Profile from './Pages/Profile';
 import { Loader2 } from 'lucide-react';
-import './App.css';
+import { CartProvider } from './context/CartContext';
 
 // Route guards
 interface PrivateRouteProps {
@@ -62,77 +62,79 @@ const HomeRoute = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="relative flex flex-col min-h-screen bg-[#131b2e] text-gray-100 selection:bg-indigo-500/30 selection:text-white overflow-hidden">
-          {/* Animated Colorful Background Layer */}
-          <div className="colorful-bg-wrapper">
-            <div className="colorful-orb-1" />
-            <div className="colorful-orb-2" />
-            <div className="colorful-orb-3" />
-            <div className="colorful-grid-overlay" />
+      <CartProvider>
+        <Router>
+          <div className="relative flex flex-col min-h-screen bg-[#131b2e] text-gray-100 selection:bg-indigo-500/30 selection:text-white overflow-hidden">
+            {/* Animated Colorful Background Layer */}
+            <div className="colorful-bg-wrapper">
+              <div className="colorful-orb-1" />
+              <div className="colorful-orb-2" />
+              <div className="colorful-orb-3" />
+              <div className="colorful-grid-overlay" />
+            </div>
+
+            <Navbar />
+            
+            <main className="relative z-10 flex-grow flex flex-col pt-24">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<HomeRoute />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+
+                {/* Protected Regular Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <PrivateRoute>
+                      <DashboardRoute />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <PrivateRoute>
+                      <Profile />
+                    </PrivateRoute>
+                  }
+                />
+
+                {/* Protected Admin Routes */}
+                <Route
+                  path="/admin"
+                  element={
+                    <PrivateRoute requireAdmin>
+                      <Admin />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin/add"
+                  element={
+                    <PrivateRoute>
+                      <AddVehicle />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin/edit/:id"
+                  element={
+                    <PrivateRoute requireAdmin>
+                      <EditVehicle />
+                    </PrivateRoute>
+                  }
+                />
+
+                {/* Catch-all redirect */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+
+            <Footer />
           </div>
-
-          <Navbar />
-          
-          <main className="relative z-10 flex-grow flex flex-col pt-24">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<HomeRoute />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-
-              {/* Protected Regular Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <DashboardRoute />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <PrivateRoute>
-                    <Profile />
-                  </PrivateRoute>
-                }
-              />
-
-              {/* Protected Admin Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <PrivateRoute requireAdmin>
-                    <Admin />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin/add"
-                element={
-                  <PrivateRoute>
-                    <AddVehicle />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin/edit/:id"
-                element={
-                  <PrivateRoute requireAdmin>
-                    <EditVehicle />
-                  </PrivateRoute>
-                }
-              />
-
-              {/* Catch-all redirect */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-
-          <Footer />
-        </div>
-      </Router>
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }
