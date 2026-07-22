@@ -24,18 +24,11 @@ const Navbar = () => {
     <>
       <nav className="glass-panel fixed top-0 left-0 right-0 w-full z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 shadow-md">
         <div className="flex items-center space-x-3">
-          <div className="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg flex items-center justify-center">
-            {/* DriveHub Car Icon */}
-            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H6.5c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-            </svg>
+          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-glow">
+            <Car className="h-6 w-6" />
           </div>
-          <Link to="/" className="flex flex-col">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-black tracking-tight text-white leading-none">DriveHub</span>
-              <span className="text-[9px] uppercase font-extrabold tracking-widest bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded">INVENTORY</span>
-            </div>
-            <span className="text-[10px] text-slate-400 font-semibold tracking-wide mt-1">Dealership Management Kata</span>
+          <Link to="/" className="text-xl font-extrabold tracking-wider text-white">
+            VeloCity Systems
           </Link>
         </div>
 
