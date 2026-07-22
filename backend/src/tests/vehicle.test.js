@@ -150,6 +150,33 @@ describe('Vehicles and Inventory API', () => {
 
       expect(res.statusCode).toEqual(401);
     });
+
+    it('should allow Admin to add a vehicle with manual performance specifications overrides', async () => {
+      const res = await request(app)
+        .post('/api/vehicles')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          make: 'Ferrari',
+          model: 'SF90 Stradale',
+          category: 'Supercar',
+          price: 500000,
+          quantity: 1,
+          powertrain: '4.0L Twin-Turbo V8 Plug-in Hybrid',
+          acceleration: '2.5s',
+          range: '15 miles',
+          topSpeed: '211 mph',
+          horsepower: '986 hp',
+          transmission: '8-Speed Dual-Clutch'
+        });
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body.powertrain).toEqual('4.0L Twin-Turbo V8 Plug-in Hybrid');
+      expect(res.body.acceleration).toEqual('2.5s');
+      expect(res.body.range).toEqual('15 miles');
+      expect(res.body.topSpeed).toEqual('211 mph');
+      expect(res.body.horsepower).toEqual('986 hp');
+      expect(res.body.transmission).toEqual('8-Speed Dual-Clutch');
+    });
   });
 
   describe('GET /api/vehicles', () => {
@@ -161,6 +188,27 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toEqual(3);
+    });
+  });
+
+  describe('GET /api/vehicles/:id', () => {
+    it('should return a single vehicle by ID', async () => {
+      const res = await request(app)
+        .get(`/api/vehicles/${testVehicleId}`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.id).toEqual(testVehicleId);
+      expect(res.body.make).toEqual('Toyota');
+      expect(res.body.model).toEqual('Camry');
+    });
+
+    it('should return 404 for a non-existent vehicle ID', async () => {
+      const res = await request(app)
+        .get('/api/vehicles/000000000000000000000000')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.statusCode).toEqual(404);
     });
   });
 
@@ -221,6 +269,20 @@ describe('Vehicles and Inventory API', () => {
         });
 
       expect(res.statusCode).toEqual(403);
+    });
+
+    it('should allow Admin to update manual performance specifications', async () => {
+      const res = await request(app)
+        .put(`/api/vehicles/${testVehicleId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          powertrain: 'Supercharged V8',
+          acceleration: '3.5s'
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.powertrain).toEqual('Supercharged V8');
+      expect(res.body.acceleration).toEqual('3.5s');
     });
   });
 
