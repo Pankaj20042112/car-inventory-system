@@ -7,6 +7,8 @@ import CartDrawer from './CartDrawer';
 import InteractiveReceiptModal from './InteractiveReceiptModal';
 import { generateReceiptPDF } from '../utils/pdfHelper';
 
+import logoImg from '../assets/logo.jpg';
+
 const Navbar = () => {
   const { user, logoutUser } = useContext(AuthContext);
   const { cartCount } = useContext(CartContext);
@@ -22,13 +24,14 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="glass-panel fixed top-0 left-0 right-0 w-full z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 shadow-md">
+      <nav className="glass-panel fixed top-0 left-0 right-0 w-full z-50 px-6 py-3 flex items-center justify-between border-b border-white/5 shadow-md">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-glow">
-            <Car className="h-6 w-6" />
-          </div>
-          <Link to="/" className="text-xl font-extrabold tracking-wider text-white">
-            VeloCity Systems
+          <Link to="/" className="flex items-center">
+            <img 
+              src={logoImg} 
+              alt="VeloCity System Logo" 
+              className="h-11 w-auto object-contain rounded-lg border border-white/5 hover:border-indigo-500/30 transition-all duration-300"
+            />
           </Link>
         </div>
 
