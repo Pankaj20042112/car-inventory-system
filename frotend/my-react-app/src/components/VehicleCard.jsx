@@ -1,9 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { ShoppingCart, Edit2, RotateCcw, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
+import VehicleDetailsModal from './VehicleDetailsModal';
 
 const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
   const { addToCart, cart } = useContext(CartContext);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const isOutOfStock = vehicle.quantity <= 0;
 
   const cartItem = cart.find((item) => item.id === vehicle.id);
@@ -42,16 +44,21 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
   return (
     <div className="glass-panel glass-panel-hover rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 shadow-lg transition-all duration-300">
       {/* Vehicle Render (Image or SVG Fallback) */}
-      <div className="h-44 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 relative flex items-center justify-center border-b border-white/5 overflow-hidden">
+      <div 
+        onClick={() => !isAdmin && setIsDetailsOpen(true)}
+        className={`h-44 bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950/40 relative flex items-center justify-center border-b border-white/5 overflow-hidden ${
+          !isAdmin ? 'cursor-pointer group' : ''
+        }`}
+      >
         {showImage ? (
           <img
             src={vehicle.imageUrl}
             alt={`${vehicle.make} ${vehicle.model}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-24 h-24 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+          <div className="w-24 h-24 flex items-center justify-center filter drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-transform duration-500 group-hover:scale-110">
             {renderCarSvg(vehicle.category)}
           </div>
         )}
@@ -74,8 +81,13 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
       {/* Vehicle Specs */}
       <div className="p-6 flex-grow flex flex-col justify-between">
         <div>
-          <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{vehicle.make}</span>
-          <h3 className="text-xl font-bold text-white mb-2">{vehicle.model}</h3>
+          <div 
+            onClick={() => !isAdmin && setIsDetailsOpen(true)}
+            className={!isAdmin ? 'cursor-pointer hover:text-indigo-400 transition-colors' : ''}
+          >
+            <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{vehicle.make}</span>
+            <h3 className="text-xl font-bold text-white mb-2">{vehicle.model}</h3>
+          </div>
           
           <div className="text-2xl font-black text-white bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent mb-4">
             ${vehicle.price.toLocaleString()}
@@ -86,28 +98,37 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
         <div className="space-y-3">
           {/* Purchase / Add to Cart Button */}
           {!isAdmin && (
-            <button
-              onClick={() => addToCart(vehicle)}
-              disabled={isOutOfStock || isCartLimitReached}
-              className={`w-full flex items-center justify-center space-x-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
-                isOutOfStock
-                  ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
-                  : isCartLimitReached
-                  ? 'bg-slate-800 text-indigo-400 border border-indigo-500/20 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-glow border border-indigo-500/30'
-              }`}
-            >
-              <ShoppingCart className="h-4 w-4" />
-              <span>
-                {isOutOfStock
-                  ? 'Unavailable'
-                  : isCartLimitReached
-                  ? 'Max Stock Added'
-                  : qtyInCart > 0
-                  ? `Add More (${qtyInCart})`
-                  : 'Add to Cart'}
-              </span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsDetailsOpen(true)}
+                className="flex-1 bg-slate-900 hover:bg-slate-800 text-gray-300 font-semibold py-3 rounded-xl text-sm transition-all duration-200 border border-white/10"
+              >
+                Specs Details
+              </button>
+
+              <button
+                onClick={() => addToCart(vehicle)}
+                disabled={isOutOfStock || isCartLimitReached}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
+                  isOutOfStock
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                    : isCartLimitReached
+                    ? 'bg-slate-800 text-indigo-400 border border-indigo-500/20 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-glow border border-indigo-500/30'
+                }`}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span>
+                  {isOutOfStock
+                    ? 'Sold Out'
+                    : isCartLimitReached
+                    ? 'Maxed'
+                    : qtyInCart > 0
+                    ? `Add (${qtyInCart})`
+                    : 'Add'}
+                </span>
+              </button>
+            </div>
           )}
 
           {/* Admin Tools Panel */}
@@ -138,6 +159,16 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
           )}
         </div>
       </div>
+
+      {/* Vehicle Specification Details Pop-up Modal */}
+      <VehicleDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        vehicle={vehicle}
+        onAddToCart={addToCart}
+        qtyInCart={qtyInCart}
+        isCartLimitReached={isCartLimitReached}
+      />
     </div>
   );
 };
