@@ -87,21 +87,19 @@ Ensure you have **Node.js** (v18+) and **MongoDB** installed and running on your
 
 ## 📸 Application Screenshots
 
-### 1. Brand Logo Design
-*Featuring metallic blue car contours overlayed on a high-fidelity brand badge.*
-![VeloCity Logo](screenshots/velocity_logo.jpg)
 
-### 2. Administrator Management Console
+
+### 1. Administrator Management Console
 *Dynamic reporting showing Fleet Valuations, Gross Sales Revenue, and Stock Warnings.*
-![Admin Dashboard](screenshots/admin_dashboard.png)
+![Admin Dashboard](screenshots\admin_panel.png.png)
 
-### 3. High-Fidelity Showroom Catalog
+### 2. High-Fidelity Showroom Catalog
 *Clean card components displaying category tags, starting price configurations, and shopping options.*
-![Vehicle Cards](screenshots/vehicle_card.png)
+![Vehicle Cards](screenshots/dashboard.png.png)
 
-### 4. Vehicle Details & Specs Grid
+### 3. Vehicle Details & Specs Grid
 *Custom specs detail list representing powertrain attributes, acceleration, top speed, and warranty info.*
-![Specifications Details](screenshots/vehicle_specs.png)
+![Specifications Details](screenshots/detail.png.png)
 
 ---
 
