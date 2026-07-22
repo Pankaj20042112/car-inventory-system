@@ -14,9 +14,6 @@ const Navbar = () => {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [checkoutPurchases, setCheckoutPurchases] = useState(null);
-  useEffect(() => {
-    document.body.classList.add('light-mode');
-  }, []);
 
   const handleLogout = () => {
     logoutUser();
