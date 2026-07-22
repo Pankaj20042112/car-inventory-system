@@ -107,7 +107,7 @@ const Admin = () => {
       // Header Banner Text
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
+      doc.setFontSize(16);
       doc.text('VELOCITY SYSTEMS LUXURY DEALERSHIP', 15, 20);
 
       doc.setFont('helvetica', 'normal');

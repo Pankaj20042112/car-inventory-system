@@ -88,7 +88,7 @@ const Dashboard = () => {
       // Header Banner Text
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
+      doc.setFontSize(16);
       doc.text('VELOCITY SYSTEMS LUXURY DEALERSHIP', 15, 20);
 
       doc.setFont('helvetica', 'normal');
@@ -99,14 +99,16 @@ const Dashboard = () => {
 
       const receiptNo = purchase?.receiptNo || 'REC-' + Math.floor(100000 + Math.random() * 900000);
       const dateStr = purchase?.createdAt ? new Date(purchase.createdAt).toLocaleString() : new Date().toLocaleString();
+      const pageWidth = doc.internal.pageSize.getWidth();
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(255, 255, 255);
-      doc.text(`RECEIPT: ${receiptNo}`, 145, 20);
+      doc.text(`Receipt: ${receiptNo}`, pageWidth - 15, 18, { align: 'right' });
       doc.setFont('helvetica', 'normal');
-      doc.text(`Date: ${purchase?.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`, 145, 26);
-      doc.text('Status: PAID', 145, 32);
+      const dateVal = purchase?.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+      doc.text(`Date: ${dateVal}`, pageWidth - 15, 26, { align: 'right' });
+      doc.text('Status: PAID', pageWidth - 15, 34, { align: 'right' });
 
       // Indigo Accent Line
       doc.setFillColor(99, 102, 241);
