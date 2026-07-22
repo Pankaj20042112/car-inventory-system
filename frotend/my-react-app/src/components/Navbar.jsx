@@ -24,11 +24,17 @@ const Navbar = () => {
     <>
       <nav className="glass-panel fixed top-0 left-0 right-0 w-full z-50 px-6 py-4 flex items-center justify-between border-b border-white/5 shadow-md">
         <div className="flex items-center space-x-3">
-          <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-glow">
-            <Car className="h-6 w-6" />
+          <div className="bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-2.5 rounded-xl text-white shadow-glow flex items-center justify-center">
+            {/* Custom Modern Speed Vector Logo */}
+            <svg className="h-5.5 w-5.5 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.95" />
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
-          <Link to="/" className="text-xl font-extrabold tracking-wider text-white">
-            VeloCity Systems
+          <Link to="/" className="text-xl font-black tracking-wider text-white flex items-center gap-2">
+            <span className="bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">VeloCity</span>
+            <span className="text-[9px] uppercase font-black tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded">SYSTEMS</span>
           </Link>
         </div>
 
