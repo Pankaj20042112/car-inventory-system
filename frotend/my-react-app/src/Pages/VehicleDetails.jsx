@@ -207,9 +207,25 @@ const VehicleDetails = () => {
               <h1 className="text-3xl font-black text-white mt-1">{vehicle.model}</h1>
             </div>
 
-            <div className="text-3xl font-black text-emerald-400 bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-              ${vehicle.price.toLocaleString()}
-            </div>
+            {vehicle.category && vehicle.category.toLowerCase() === 'sedan' ? (
+              <div className="space-y-1">
+                <div className="flex items-baseline space-x-2.5">
+                  <span className="text-3xl font-black text-emerald-400">
+                    ${(vehicle.price * 0.9).toLocaleString()}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    ${vehicle.price.toLocaleString()}
+                  </span>
+                </div>
+                <span className="inline-block text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                  10% Sedan Special Discount Applied
+                </span>
+              </div>
+            ) : (
+              <div className="text-3xl font-black text-emerald-400 bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
+                ${vehicle.price.toLocaleString()}
+              </div>
+            )}
 
             <div className="border-t border-white/5 pt-6 space-y-4">
               <div className="flex items-center justify-between text-sm">

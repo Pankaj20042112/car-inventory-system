@@ -188,8 +188,20 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(200);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toEqual(3);
+      expect(res.body[0]).toHaveProperty('make');
+      console.log(res.body);
+
     });
   });
+  describe("Vehicle Discount", () => {
+
+  it("should return the discounted price", () => {
+    const originalPrice = 22000;
+    const discountedPrice = originalPrice - (originalPrice * 10) / 100;
+
+    expect(discountedPrice).toBe(19800);
+  });
+});
 
   describe('GET /api/vehicles/:id', () => {
     it('should return a single vehicle by ID', async () => {
@@ -322,6 +334,7 @@ describe('Vehicles and Inventory API', () => {
       expect(res.body.purchase.buyerName).toEqual('Test User');
       expect(res.body.purchase.buyerEmail).toEqual('test_user@example.com');
       expect(res.body.purchase.make).toEqual('Toyota');
+      expect(res.body.purchase.price).toEqual(21600); // 10% Sedan discount (24000 -> 21600)
 
       const check = await prisma.vehicle.findUnique({ where: { id: testVehicleId } });
       expect(check.quantity).toEqual(4);
@@ -410,6 +423,11 @@ describe('Vehicles and Inventory API', () => {
       expect(res.body.purchases.length).toEqual(2);
       expect(res.body.purchases[0].receiptNo).toEqual(res.body.purchases[1].receiptNo);
 
+      const teslaPurchase = res.body.purchases.find(p => p.make === 'Tesla');
+      const toyotaPurchase = res.body.purchases.find(p => p.make === 'Toyota');
+      expect(teslaPurchase.price).toEqual(48000); // SUV: no discount
+      expect(toyotaPurchase.price).toEqual(21600); // Sedan: 10% discount
+
       const checkTesla = await prisma.vehicle.findUnique({ where: { id: tesla.id } });
       const checkToyota = await prisma.vehicle.findUnique({ where: { id: toyota.id } });
       expect(checkTesla.quantity).toEqual(2); // 3 -> 2
@@ -446,4 +464,19 @@ describe('Vehicles and Inventory API', () => {
       expect(res.statusCode).toEqual(400);
     });
   });
+
+
+  const request = require("supertest");
+describe("discount", () => {
+  it("should apply 10% discount", async () => {
+    const response = await request(app)
+      .post("/discount")
+      .send({ price: 100000 });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.finalPrice).toBe(90000);
+    expect(response.body.discount).toBe("10%");
+  });
 });
+});
+

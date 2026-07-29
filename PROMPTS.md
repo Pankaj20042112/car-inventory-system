@@ -73,3 +73,35 @@ The following prompts were used during the development of the Velocity Systems C
 ## Prompt 12 – Documentation
 **Prompt:**
 > Help me write a professional README.md and PROMPTS.md for my project submission.
+---
+
+## Prompt 13
+**Prompt:**
+> <USER_REQUEST>
+> can test the website
+> </USER_REQUEST>
+> <ADDITIONAL_METADATA>
+> The current local time is: 2026-07-26T20:09:11+05:30.
+> </ADDITIONAL_METADATA>
+
+---
+
+## Prompt 14
+**Prompt:**
+> <USER_REQUEST>
+> can test the website
+> </USER_REQUEST>
+> <ADDITIONAL_METADATA>
+> The current local time is: 2026-07-29T23:33:44+05:30.
+> </ADDITIONAL_METADATA>
+
+---
+
+## Prompt 15
+**Prompt:**
+> <USER_REQUEST>
+> add when category of sedan vehical can give 10% discount
+> </USER_REQUEST>
+> <ADDITIONAL_METADATA>
+> The current local time is: 2026-07-29T23:35:51+05:30.
+> </ADDITIONAL_METADATA>

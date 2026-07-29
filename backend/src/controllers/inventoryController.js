@@ -35,7 +35,7 @@ exports.purchaseVehicle = async (req, res) => {
         make: vehicle.make,
         model: vehicle.model,
         category: vehicle.category,
-        price: vehicle.price
+        price: vehicle.category && vehicle.category.toLowerCase() === 'sedan' ? vehicle.price * 0.9 : vehicle.price
       }
     });
 
@@ -185,7 +185,7 @@ exports.checkoutCart = async (req, res) => {
             make: vehicle.make,
             model: vehicle.model,
             category: vehicle.category,
-            price: vehicle.price
+            price: vehicle.category && vehicle.category.toLowerCase() === 'sedan' ? vehicle.price * 0.9 : vehicle.price
           }
         });
         purchases.push(purchase);

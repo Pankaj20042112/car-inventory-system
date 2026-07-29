@@ -19,6 +19,20 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 
+// Discount endpoint for unit testing
+app.post('/discount', (req, res) => {
+  const { price } = req.body;
+  const priceNum = parseFloat(price);
+  if (isNaN(priceNum)) {
+    return res.status(400).json({ error: 'Invalid price' });
+  }
+  const finalPrice = priceNum * 0.9;
+  return res.status(200).json({
+    finalPrice,
+    discount: '10%'
+  });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large' || err.name === 'PayloadTooLargeError') {

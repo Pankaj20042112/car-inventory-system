@@ -89,9 +89,23 @@ const VehicleCard = ({ vehicle, onEdit, onRestock, onDelete, isAdmin }) => {
             <h3 className="text-xl font-bold text-white mb-2">{vehicle.model}</h3>
           </div>
           
-          <div className="text-2xl font-black text-white bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent mb-4">
-            ${vehicle.price.toLocaleString()}
-          </div>
+          {vehicle.category && vehicle.category.toLowerCase() === 'sedan' ? (
+            <div className="flex items-baseline space-x-2.5 mb-4">
+              <span className="text-2xl font-black text-emerald-400">
+                ${(vehicle.price * 0.9).toLocaleString()}
+              </span>
+              <span className="text-sm text-gray-500 line-through">
+                ${vehicle.price.toLocaleString()}
+              </span>
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                -10%
+              </span>
+            </div>
+          ) : (
+            <div className="text-2xl font-black text-white bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent mb-4">
+              ${vehicle.price.toLocaleString()}
+            </div>
+          )}
         </div>
 
         {/* Actions */}

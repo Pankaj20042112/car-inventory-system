@@ -84,7 +84,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const cartCount = Array.isArray(cart) ? cart.reduce((sum, item) => sum + item.cartQuantity, 0) : 0;
-  const cartTotal = Array.isArray(cart) ? cart.reduce((sum, item) => sum + item.cartQuantity * item.price, 0) : 0;
+  const cartTotal = Array.isArray(cart) ? cart.reduce((sum, item) => {
+    const itemPrice = item.category && item.category.toLowerCase() === 'sedan' ? item.price * 0.9 : item.price;
+    return sum + item.cartQuantity * itemPrice;
+  }, 0) : 0;
 
   return (
     <CartContext.Provider

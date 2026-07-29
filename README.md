@@ -119,9 +119,9 @@ PASS src/tests/vehicle.test.js
 PASS src/tests/auth.test.js
 
 Test Suites: 2 passed, 2 total
-Tests:       33 passed, 33 total
+Tests:       35 passed, 35 total
 Snapshots:   0 total
-Time:        4.994 s
+Time:        3.889 s
 Ran all test suites.
 ```
 

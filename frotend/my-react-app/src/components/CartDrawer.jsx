@@ -95,7 +95,17 @@ const CartDrawer = ({ isOpen, onClose, onCheckoutSuccess }) => {
                     <div className="min-w-0">
                       <h4 className="font-bold text-white text-sm truncate">{item.make} {item.model}</h4>
                       <p className="text-xs text-slate-400 capitalize">{item.category}</p>
-                      <p className="text-xs font-bold text-emerald-400 mt-0.5">${item.price?.toLocaleString()}</p>
+                      <p className="text-xs font-bold text-emerald-400 mt-0.5">
+                        {item.category && item.category.toLowerCase() === 'sedan' ? (
+                          <span className="flex items-center space-x-1.5">
+                            <span>${(item.price * 0.9).toLocaleString()}</span>
+                            <span className="text-[10px] text-gray-500 line-through">${item.price?.toLocaleString()}</span>
+                            <span className="text-[9px] bg-emerald-500/10 border border-emerald-500/20 px-1 rounded text-emerald-400 font-bold">-10%</span>
+                          </span>
+                        ) : (
+                          `$${item.price?.toLocaleString()}`
+                        )}
+                      </p>
                     </div>
                   </div>
 
