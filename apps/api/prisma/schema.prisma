@@ -1,0 +1,53 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         String     @default("USER")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  purchases    Purchase[]
+
+  @@map("users")
+}
+
+model Vehicle {
+  id           String     @id @default(uuid())
+  make         String
+  model        String
+  category     String
+  year         Int
+  price        Float
+  quantity     Int        @default(0)
+  imageUrl     String?
+  description  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  purchases    Purchase[]
+
+  @@map("vehicles")
+}
+
+model Purchase {
+  id         String   @id @default(uuid())
+  userId     String
+  vehicleId  String
+  quantity   Int
+  totalPrice Float
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@map("purchases")
+}
