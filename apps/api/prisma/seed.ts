@@ -14,19 +14,34 @@ async function main() {
 
   const admin = await prisma.user.create({
     data: {
+      username: 'admin',
       name: 'Dealership Admin',
       email: 'admin@dealership.com',
       passwordHash: adminPasswordHash,
-      role: Role.ADMIN
+      role: Role.ADMIN,
+      category: 'Dealer'
+    }
+  });
+
+  const pankajAdmin = await prisma.user.create({
+    data: {
+      username: 'Pankaj',
+      name: 'Pankaj Admin',
+      email: 'pankaj@dealership.com',
+      passwordHash: adminPasswordHash,
+      role: Role.ADMIN,
+      category: 'Dealer'
     }
   });
 
   const customer = await prisma.user.create({
     data: {
+      username: 'user',
       name: 'John Customer',
       email: 'user@dealership.com',
       passwordHash: userPasswordHash,
-      role: Role.USER
+      role: Role.USER,
+      category: 'Customer'
     }
   });
 

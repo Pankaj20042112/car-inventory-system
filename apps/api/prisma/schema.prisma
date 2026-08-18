@@ -11,10 +11,12 @@ generator client {
 
 model User {
   id           String     @id @default(uuid())
+  username     String     @unique
   name         String
   email        String     @unique
   passwordHash String
   role         String     @default("USER")
+  category     String     @default("Customer")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   purchases    Purchase[]

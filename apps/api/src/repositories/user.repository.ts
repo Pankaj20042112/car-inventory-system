@@ -6,11 +6,15 @@ export class UserRepository {
     return prisma.user.findUnique({ where: { email } });
   }
 
+  static async findByUsername(username: string) {
+    return prisma.user.findUnique({ where: { username } });
+  }
+
   static async findById(id: string) {
     return prisma.user.findUnique({ where: { id } });
   }
 
-  static async create(data: { name: string; email: string; passwordHash: string; role?: Role }) {
+  static async create(data: { name: string; email: string; passwordHash: string; role?: string; username: string; category?: string }) {
     return prisma.user.create({ data });
   }
 }

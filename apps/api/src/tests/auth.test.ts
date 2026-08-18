@@ -19,6 +19,7 @@ describe('Authentication API', () => {
       .send({
         name: 'John Customer',
         email: 'john@example.com',
+        username: 'john_cust',
         password: 'SecurePassword123'
       });
 
@@ -34,6 +35,7 @@ describe('Authentication API', () => {
       .send({
         name: 'Short Pass',
         email: 'short@example.com',
+        username: 'short_pass',
         password: '123'
       });
 
@@ -47,6 +49,7 @@ describe('Authentication API', () => {
       .send({
         name: 'Another John',
         email: 'john@example.com',
+        username: 'john_another',
         password: 'SecurePassword123'
       });
 
