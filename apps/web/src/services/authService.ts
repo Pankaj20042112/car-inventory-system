@@ -2,16 +2,17 @@ import API from './api';
 
 export const login = async (username, password) => {
   const response = await API.post('/auth/login', { username, password });
-  if (response.data.token) {
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+  const result = response.data.data;
+  if (result && result.token) {
+    localStorage.setItem('token', result.token);
+    localStorage.setItem('user', JSON.stringify(result.user));
   }
-  return response.data;
+  return result;
 };
 
 export const register = async (username, password, role = 'user', name, email, category) => {
   const response = await API.post('/auth/register', { username, password, role, name, email, category });
-  return response.data;
+  return response.data.data;
 };
 
 export const logout = () => {
@@ -26,13 +27,14 @@ export const getCurrentUser = () => {
 
 export const getProfile = async () => {
   const response = await API.get('/auth/me');
-  return response.data;
+  return response.data.data.user;
 };
 
 export const updateProfile = async (profileData) => {
   const response = await API.put('/auth/profile', profileData);
-  localStorage.setItem('user', JSON.stringify(response.data));
-  return response.data;
+  const result = response.data.data;
+  localStorage.setItem('user', JSON.stringify(result));
+  return result;
 };
 
 export const updatePassword = async (passwordData) => {

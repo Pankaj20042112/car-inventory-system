@@ -2,7 +2,7 @@ import API from './api';
 
 export const getVehicles = async () => {
   const response = await API.get('/vehicles');
-  return response.data;
+  return response.data.data.vehicles;
 };
 
 export const searchVehicles = async (filters) => {
@@ -14,17 +14,17 @@ export const searchVehicles = async (filters) => {
   if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
 
   const response = await API.get(`/vehicles/search?${params.toString()}`);
-  return response.data;
+  return response.data.data.vehicles;
 };
 
 export const addVehicle = async (vehicleData) => {
   const response = await API.post('/vehicles', vehicleData);
-  return response.data;
+  return response.data.data;
 };
 
 export const updateVehicle = async (id, vehicleData) => {
   const response = await API.put(`/vehicles/${id}`, vehicleData);
-  return response.data;
+  return response.data.data;
 };
 
 export const deleteVehicle = async (id) => {
@@ -34,30 +34,30 @@ export const deleteVehicle = async (id) => {
 
 export const purchaseVehicle = async (id) => {
   const response = await API.post(`/vehicles/${id}/purchase`);
-  return response.data;
+  return response.data.data;
 };
 
 export const restockVehicle = async (id, quantity) => {
   const response = await API.post(`/vehicles/${id}/restock`, { quantity });
-  return response.data;
+  return response.data.data;
 };
 
 export const getMyPurchases = async () => {
   const response = await API.get('/vehicles/my-purchases');
-  return response.data;
+  return response.data.data;
 };
 
 export const getAllPurchases = async () => {
   const response = await API.get('/vehicles/all-purchases');
-  return response.data;
+  return response.data.data;
 };
 
 export const checkoutCart = async (vehicleIds) => {
   const response = await API.post('/vehicles/checkout', { vehicleIds });
-  return response.data;
+  return response.data.data;
 };
 
 export const getVehicleById = async (id) => {
   const response = await API.get(`/vehicles/${id}`);
-  return response.data;
+  return response.data.data;
 };

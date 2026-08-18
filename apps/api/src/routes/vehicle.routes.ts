@@ -9,6 +9,12 @@ const router = Router();
 // Public routes for exploration
 router.get('/', VehicleController.getAll);
 router.get('/search', VehicleController.search);
+
+// Protected transaction list routes
+router.get('/my-purchases', authenticate as any, InventoryController.myPurchases as any);
+router.get('/all-purchases', authenticate as any, authorize(Role.ADMIN) as any, InventoryController.allPurchases as any);
+router.post('/checkout', authenticate as any, InventoryController.checkout as any);
+
 router.get('/:id', VehicleController.getById);
 
 // Protected routes (Admin operations)
